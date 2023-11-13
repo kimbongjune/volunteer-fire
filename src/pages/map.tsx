@@ -26,7 +26,7 @@ const MapPage = () => {
 
         <Flex justifyContent="space-between">
           <ButtonContainer>
-            <Button backgroundColor={theme.colors.orange} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickVehicle(!isClickVehicle)}>
+            <Button backgroundColor={isClickVehicle ? theme.colors.gray: theme.colors.orange} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickVehicle(!isClickVehicle)}>
               <Flex gap="8px">
                 <IconWrapper width="24px" height="24px" color={theme.colors.white}>
                   <FireTruck />
@@ -36,7 +36,7 @@ const MapPage = () => {
             </Button>
           </ButtonContainer>
           <ButtonContainer>
-            <Button backgroundColor={theme.colors.blue} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickWater(!isClickWater)}>
+            <Button backgroundColor={isClickWater ? theme.colors.gray: theme.colors.orange} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickWater(!isClickWater)}>
               <Flex gap="8px">
                 <IconWrapper width="24px" height="24px" color={theme.colors.white}>
                   <WaterDrop />
