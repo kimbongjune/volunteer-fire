@@ -7,6 +7,8 @@ import Mobilization from '@/features/Mobilization/Mobilization';
 import MyInfo from '@/features/MyInfo/MyInfo';
 import { useRouter } from 'next/router';
 import axios from "../../common/components/api/axios"
+import { useDispatch } from 'react-redux';
+import { setDisasterNumber } from '../../features/slice/disasterSlice';
 
 const HomePage = () => {
   const { query } = useRouter();
@@ -20,6 +22,8 @@ const HomePage = () => {
 
   console.log("mobilizationStatus",mobilizationStatus)
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     // API 호출을 수행하는 함수
     const fetchMobilizationStatus = async () => {
@@ -29,6 +33,10 @@ const HomePage = () => {
         //const response = await axios.get('/mobilization-status');
         //동원 응답이 있으면 true 없으면 false
         setIsRequest(true)
+        //전역 재난번호 저장
+        dispatch(setDisasterNumber("test"));
+        //재난이 없어질 경우 재난번호 초기화
+        //dispatch(setDisasterNumber(''));
         //동원 응답 을 읽었으면(모달 클릭) true 안 읽었으면 false
         //TODO
         //중간에 재난이 바뀔 경우를 대비해 동원 응답이 false가 도달하면 모든 state값을 초기화
@@ -58,7 +66,11 @@ const HomePage = () => {
 
   const handleApprovalChange  = (approvalStatus:React.SetStateAction<boolean>) => {
     setIsApproved(approvalStatus); //재난정보 수신 여부 변경
-    console.log(approvalStatus)
+    console.log("approvalStatus@@@@@@@@@@@@@@@@@@@@@@@@@@@@@: " + approvalStatus)
+    //재난 참여 안할시 저장 재난번호 초기화
+    if(!approvalStatus){
+      dispatch(setDisasterNumber(""));
+    }
     //router.replace(`/home?menu=mobilization&status=${approvalStatus}`)
   };
 
