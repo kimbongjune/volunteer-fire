@@ -10,6 +10,8 @@ interface Props {
   placeholder?: string;
   value?: string;
   disabled?: boolean;
+  readOnly?: boolean;
+  onClick?:(e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; //onChange 함수를 정의
 }
 
@@ -31,6 +33,8 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
       backgroundColor="#fff"
       value={props.value}
       disabled={props.disabled}
+      readOnly={props.readOnly}
+      onClick={props.onClick}
       onChange={props.onChange} // ChakraInput에 onChange를 전달
     />
   );
