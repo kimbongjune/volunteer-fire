@@ -5,37 +5,45 @@ import ModifyInformationItem, { ModifyInformationItemType } from './ModifyInform
 import Call from '../../../public/images/icons/call.svg';
 import House from '../../../public/images/icons/house.svg';
 import Bag from '../../../public/images/icons/bag.svg';
-import { useQueryParam, withDefault, StringParam } from 'use-query-params';
+import { useQueryParams, withDefault, StringParam } from 'use-query-params';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../app/store';
 
-interface Props {
-  datas: ModifyInformationItemType[];
-}
 
-const ModifyInformation = (props: Props) => {
-  const [query, setQuery] = useQueryParam('menu', withDefault(StringParam, undefined));
+const ModifyInformation = () => {
+  const [queryParams, setQueryParams] = useQueryParams({
+    menu: StringParam,
+    param: StringParam,
+  });
 
-  const onClickMenu = (query?: string) => {
-    setQuery(query);
+  const mobilizationTotalCount = useSelector((state: RootState) => state.userReducer.mobilizationTotalCount);
+  const mobilizationAcceptCount = useSelector((state: RootState) => state.userReducer.mobilizationAcceptCount);
+  const mobilizationDenyCount = useSelector((state: RootState) => state.userReducer.mobilizationDenyCount);
+  const phone = useSelector((state: RootState) => state.userReducer.phone);
+  const address = useSelector((state: RootState) => state.userReducer.address);
+  const workAddress = useSelector((state: RootState) => state.userReducer.workAddress);
+
+  const datas = [
+    { icon: <Call />, text: phone, description: '휴대전화 번호 변경하기', query: 'phoneNumber', param: phone},
+    { icon: <House />, text: address, description: '실제 살고 있는 주소 변경하기', query: 'address', param: address },
+    { icon: <Bag />, text: workAddress, description: '근무하고 있는 주소 변경하기', query: 'workAddress', param: workAddress },
+  ];
+
+  const onClickMenu = (menuItemQuery: string, paramValue: string) => {
+    // 모든 관련 쿼리 파라미터를 함께 설정
+    setQueryParams({ menu: menuItemQuery, param: paramValue });
   };
 
   return (
     <>
-      <MobilizationRequestHistory />
+      <MobilizationRequestHistory mobilizationTotalCount={mobilizationTotalCount} mobilizationAcceptCount={mobilizationAcceptCount} mobilizationDenyCount={mobilizationDenyCount}/>
       <VStack gap="8px" marginTop="8px" width="100%">
-        {props?.datas?.map((data, index) => {
-          return <ModifyInformationItem key={index} onClick={onClickMenu} icon={data.icon} text={data.text} description={data.description} query={data.query} />;
+        {datas?.map((data, index) => {
+          return <ModifyInformationItem key={index} onClick={() => onClickMenu(data.query, data.param)} icon={data.icon} text={data.text} description={data.description} query={data.query} />;
         })}
       </VStack>
     </>
   );
-};
-
-ModifyInformation.defaultProps = {
-  datas: [
-    { icon: <Call />, text: '010-1234-5678', description: '휴대전화 번호 변경하기', query: 'phoneNumber' },
-    { icon: <House />, text: '장유시 율하 도로명 123-456', description: '실제 살고 있는 주소 변경하기', query: 'address' },
-    { icon: <Bag />, text: '장유시 율하 도로명 123-456', description: '근무하고 있는 주소 변경하기', query: 'workAddress' },
-  ],
 };
 
 export default ModifyInformation;

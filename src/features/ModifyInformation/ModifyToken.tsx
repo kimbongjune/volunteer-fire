@@ -1,25 +1,60 @@
-import React from 'react';
+import React,{useState} from 'react';
 import styled from '@emotion/styled';
 import theme from '@/theme/colors';
 import { Flex, VStack } from '@chakra-ui/react';
 import IconWrapper from '@/common/components/IconWrapper/IconWrapper';
 import Refresh from '../../../public/images/icons/refresh.svg';
 import Button from '@/common/components/Button/Button';
+import { useRouter } from 'next/router';
+import axios from "../../common/components/api/axios"
+import { useDispatch } from 'react-redux';
+import { saveToken } from '../../features/slice/UserinfoSlice';
 
-interface Props {
-  token: string;
-  newToken: string;
-}
+const ModifyToken = () => {
+  const router = useRouter()
+  const query = router.query
 
-const ModifyToken = (props: Props) => {
+  const dispatch = useDispatch()
+
+  const [newToken, setNewToken] = useState("")
+  const [token, setToken] = useState(query.param)
+
+  const updateToken = async () => {
+    try {
+      //앱과 통신하여 새로운 토큰을 받아오고 state에 저장함
+      setNewToken("새로운 토큰")
+    } catch (error) {
+      // 에러 처리
+      console.error('Failed to fetch user info status:', error);
+    }
+  };
+
+  const updateUserInfo = async () => {
+    try {
+      //API 호출 로직
+      console.log("유저정보 갱신 콜")
+      //const response = await axios.get('/user-info');
+      setToken(newToken)
+      setNewToken("")
+      dispatch(saveToken(newToken))
+      router.replace({
+        pathname: router.pathname, // 현재 페이지 경로
+        query: { ...router.query, param: newToken }, // 나머지 쿼리 유지하며 'param'만 업데이트
+      }, undefined, { shallow: true }); // 페이지 전환 없이 URL 업데이트
+    } catch (error) {
+      // 에러 처리
+      console.error('Failed to fetch user info status:', error);
+    }
+  };
+
   return (
     <VStack gap="8px" h="100%">
       <TokenBox>
         <Flex justifyContent="space-between" alignItems="center">
           <Title>등록된 토큰</Title>
-          <Token>{props.token}</Token>
+          <Token>{token}</Token>
         </Flex>
-        <TokenButton>
+        <TokenButton onClick={updateToken}>
           <Flex gap="8px" justifyContent="center" alignItems="center">
             <IconWrapper width="20px" height="20px" color={theme.colors.white}>
               <Refresh />
@@ -32,21 +67,16 @@ const ModifyToken = (props: Props) => {
       <TokenBox>
         <Flex justifyContent="space-between" alignItems="center">
           <Title>새로 생성된 토큰</Title>
-          {props.newToken && <NewToken>{props.newToken}</NewToken>}
-          {!props.newToken && <NewToken>-</NewToken>}
+          {newToken&& <NewToken>{newToken}</NewToken>}
+          {!newToken && <NewToken>-</NewToken>}
         </Flex>
       </TokenBox>
 
-      <Button backgroundColor={theme.colors.orange} height="56px" padding="16px" margin="auto 0 0">
+      <Button backgroundColor={theme.colors.orange} height="56px" padding="16px" margin="auto 0 0" onClick={updateUserInfo}>
         <ButtonText>등록 신청하기</ButtonText>
       </Button>
     </VStack>
   );
-};
-
-ModifyToken.defaultProps = {
-  token: 'qiuwi-09423-qweiu-vjxck',
-  newToken: 'zxciv-30948-kjdjv-jfnbc',
 };
 export default ModifyToken;
 

@@ -1,36 +1,76 @@
-import React from 'react';
+import React,{useState, useRef} from 'react';
 import theme from '@/theme/colors';
 import styled from '@emotion/styled';
 import Input from '@/common/components/Input/input';
 import { VStack } from '@chakra-ui/react';
 import Button from '@/common/components/Button/Button';
+import { useRouter } from 'next/router';
+import axios from "../../common/components/api/axios"
+import { useDispatch } from 'react-redux';
+import { savePhone } from '../../features/slice/UserinfoSlice';
 
-interface Props {
-  phone: string;
-}
+const ModifyPhoneNumber = () => {
 
-const ModifyPhoneNumber = (props: Props) => {
+  const phoneRef = useRef<HTMLInputElement>(null);
+
+  const dispatch = useDispatch();
+
+  const router = useRouter();
+  const query = router.query;
+
+  const [phone, setPhone] = useState(query.param)
+  const [newPhone, setNewPhone] = useState('');
+
+  const updateUserInfo = async () => {
+    try {
+      //API 호출 로직
+      console.log("유저정보 갱신 콜")
+      //const response = await axios.get('/user-info');
+      //텍스트의 전화번호를 서버에 전송하여 전화번호 갱신
+      //유저정보를 state에 저장
+      if(newPhone === "" || newPhone === null){
+        phoneRef.current?.focus()
+        return alert("빈칸 안돼")
+      }
+      setPhone(newPhone)
+      //완료되면 인풋 밸류 초기화
+      console.log(newPhone)
+      dispatch(savePhone(newPhone))
+      setNewPhone("")
+      router.replace({
+        pathname: router.pathname, // 현재 페이지 경로
+        query: { ...router.query, param: newPhone }, // 나머지 쿼리 유지하며 'param'만 업데이트
+      }, undefined, { shallow: true }); // 페이지 전환 없이 URL 업데이트
+    } catch (error) {
+      // 에러 처리
+      console.error('Failed to fetch user info status:', error);
+    }
+  };
+
+  // Input 값 변경 핸들러
+  const handleInputChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    setNewPhone(e.target.value); // 사용자 입력에 따라 newPhone state 업데이트
+  };
+
   return (
     <VStack gap="16px" w="100%" h="100%">
       <Box>
         <Title>기존</Title>
-        <InputBox>{props.phone}</InputBox>
+        <InputBox>{phone}</InputBox>
       </Box>
       <Form>
         <Title>변경</Title>
         <InputWrapper>
-          <Input fontSize="16px" fontWeight={600} lineHeight="20px" letterSpacing="-0.32px" color={theme.colors[7]} />
+          <Input ref={phoneRef} fontSize="16px" value={newPhone} fontWeight={600} lineHeight="20px" letterSpacing="-0.32px" color={theme.colors[7]} onChange={handleInputChange} />
         </InputWrapper>
       </Form>
-      <Button backgroundColor={theme.colors.orange} height="56px" padding="16px" margin="auto 0 0">
+      <Button backgroundColor={theme.colors.orange} height="56px" padding="16px" margin="auto 0 0" onClick={updateUserInfo}>
         <ButtonText>변경 신청하기</ButtonText>
       </Button>
     </VStack>
   );
 };
-ModifyPhoneNumber.defaultProps = {
-  phone: '010-1234-5678',
-};
+
 export default ModifyPhoneNumber;
 
 const Box = styled.div`

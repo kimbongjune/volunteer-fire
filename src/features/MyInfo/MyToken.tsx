@@ -14,8 +14,8 @@ const MyToken = (props: Props) => {
   const router = useRouter();
 
   return (
-    <Container onClick={() => router.push('/home/modifyInfo?menu=token')}>
-      <Title>토근 정보</Title>
+    <Container onClick={() => router.push(`/home/modifyInfo?menu=token&param=${props.token}`)}>
+      <Title>토큰 정보</Title>
       <Flex justifyContent="space-between">
         <SubTitle>등록된 토큰</SubTitle>
         <Flex gap="4px" alignItems="center">
