@@ -9,10 +9,15 @@ import { Flex } from '@chakra-ui/react';
 import IconWrapper from '@/common/components/IconWrapper/IconWrapper';
 import FireTruck from '../../public/images/icons/fireTruck.svg';
 import WaterDrop from '../../public/images/icons/waterDrop.svg';
+import { useSelector } from 'react-redux';
+import { RootState } from '../app/store';
 
 const MapPage = () => {
   const [isClickVehicle, setIsClickVehicle] = useState(false);
   const [isClickWater, setIsClickWater] = useState(false);
+
+  const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
+  console.log("disasterNumber = " + disasterNumber)
 
   return (
     <>
