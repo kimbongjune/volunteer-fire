@@ -13,6 +13,7 @@ declare module '@emotion/react' {
       orange: string;
       red: string;
       blue: string;
+      green: string;
       white: string;
       gray: string;
     };
@@ -33,6 +34,7 @@ const theme = {
     orange: '#FF8A3A',
     red: '#FE7575',
     blue: '#799EFF',
+    green: '#77D134',
     white: '#fff',
     gray: '#909AA4',
   },
