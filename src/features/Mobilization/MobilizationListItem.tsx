@@ -10,7 +10,6 @@ import ApprovalModal from '@/common/components/Modal/ApprovalModal';
 import Find from '../../../public/images/icons/find.svg';
 import Time from '../../../public/images/icons/time.svg';
 import Button from '../../common/components/Button/Button';
-import NoMobilization from './NoMobilization';
 
 interface Props {
   titleIcon: string;
@@ -18,14 +17,14 @@ interface Props {
   address: string;
   time: string;
   mobilizationStatus: boolean;
-  isApproved:Boolean
+  isApproved:boolean
   onMobilizationStatusChange: (isApproved:React.SetStateAction<boolean>) => void;
   onApprovalChange: (isApproved:React.SetStateAction<boolean>) => void;
 }
 
 const MobilizationListItem = (props: Props) => {
   const router = useRouter();
-  const [isApproved, setIsApproved] = useState(false);
+  const [isApproved, setIsApproved] = useState(props.isApproved);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isRejectedModalOpen, setIsRejectedModalOpen] = useState(false);
 

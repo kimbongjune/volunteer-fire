@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import styled from '@emotion/styled';
 import theme from '@/theme/colors';
@@ -10,8 +10,38 @@ import Close from '../../../public/images/icons/close.svg';
 import Distance from '../../../public/images/icons/distance.svg';
 import Room from '../../../public/images/icons/room.svg';
 import Warning from '../../../public/images/icons/warning.svg';
+import { useDispatch } from 'react-redux';
+import { setDisasterAccptFlag } from '../../features/slice/disasterSlice';
+import axios from "../../common/components/api/axios"
+import { useRouter } from 'next/router';
 
 const MobilizationStatus = () => {
+  const [isArriva, setIsArrival] = useState(false);
+  const [isDrawal, setIsDrawal] = useState(false);
+  const dispatch = useDispatch()
+  const router = useRouter(); 
+
+  const arrivalClick = () => {
+    //현장 도착 API 발송
+    console.log("현장 도착");
+  }
+
+  const withdrawalClick = () => {
+    //현장 철수 API 발송
+    console.log("현장 철수");
+  }
+
+  const cancelMobilization = () => {
+    //동원 취소 API 발송
+    console.log("동원 취소");
+    
+    dispatch(setDisasterAccptFlag(false))
+    router.replace('/home?menu=mobilization');
+    if (window.fireAgency && window.fireAgency.stopLocationService) {
+      window.fireAgency.stopLocationService();
+    }
+  }
+
   return (
     <Layout>
       <Container>
@@ -22,16 +52,16 @@ const MobilizationStatus = () => {
             </Flex>
             <SubText>아래 버튼을 눌러주세요</SubText>
           </div>
-          <Link href={'/home?menu=mobilization&status=true'} style={{ position: 'absolute', top: '26px', right: '16px' }}>
+          <Link href={'/home?menu=mobilization'} style={{ position: 'absolute', top: '26px', right: '16px' }}>
             <IconWrapper width="24px" height="24px" color={theme.colors[7]}>
               <Close />
             </IconWrapper>
           </Link>
         </Header>
         <Body>
-          <MobilizationStatusItem color={theme.colors.orange} icon={<Distance />} marginBottom="16px" statusText="현장 도착" />
-          <MobilizationStatusItem color={theme.colors.blue} icon={<Room />} marginBottom="136px" statusText="현장 철수" />
-          <MobilizationStatusItem color={theme.colors[7]} icon={<Warning />} statusText="동원 취소" />
+          <MobilizationStatusItem color={theme.colors.orange} icon={<Distance />} marginBottom="16px" statusText="현장 도착" onClick={arrivalClick} />
+          <MobilizationStatusItem color={theme.colors.blue} icon={<Room />} marginBottom="136px" statusText="현장 철수" onClick={withdrawalClick} />
+          <MobilizationStatusItem color={theme.colors[7]} icon={<Warning />} statusText="동원 취소" onClick={cancelMobilization} />
         </Body>
       </Container>
     </Layout>

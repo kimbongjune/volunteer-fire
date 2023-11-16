@@ -8,9 +8,12 @@ interface Props {
   mobilizationStatus?: boolean;
   hasRead: boolean;
   onModalClose: () => void;
-  isApproved:Boolean
+  isApproved:boolean
   onMobilizationStatusChange: (isApproved:React.SetStateAction<boolean>) => void;
   onApprovalChange: (isApproved:React.SetStateAction<boolean>) => void;
+  title: string;
+  address: string;
+  time: string;
 }
 
 const Mobilization = (props: Props) => {  
@@ -18,11 +21,11 @@ const Mobilization = (props: Props) => {
     <>
       {/* 동원(소집) 요청이 있고, 사용자가 아직 알림을 읽지 않았을 경우 모달을 보여줌. */}
       {props.isRequest && !props.hasRead && (
-        <RequestModal onClickButton={props.onModalClose} />
+        <RequestModal title={props.title} onClickButton={props.onModalClose} />
       )}
       {/* 동원(소집) 요청이 있고, 사용자가 알림을 읽었으면, 동원 목록을 보여줌. */}
       {props.isRequest && props.hasRead && (!props.mobilizationStatus || props.isApproved) &&(
-        <MobilizationList mobilizationStatus={props.mobilizationStatus!!} onMobilizationStatusChange={props.onMobilizationStatusChange} isApproved={props.isApproved} onApprovalChange={props.onApprovalChange} />
+        <MobilizationList time={props.time} address={props.address} title={props.title} mobilizationStatus={props.mobilizationStatus!!} onMobilizationStatusChange={props.onMobilizationStatusChange} isApproved={props.isApproved} onApprovalChange={props.onApprovalChange} />
       )}
       {/* 동원(소집) 요청이 없을 경우, 'NoMobilization' 컴포넌트를 보여줌. */}
       {props.isRequest && props.mobilizationStatus && !props.isApproved &&(

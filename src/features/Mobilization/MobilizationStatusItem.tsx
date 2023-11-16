@@ -9,11 +9,12 @@ interface Props {
   icon: ReactNode;
   marginBottom?: string;
   statusText: string;
+  onClick?: () => void;
 }
 
 const MobilizationStatusItem = (props: Props) => {
   return (
-    <Container color={props.color} marginBottom={props?.marginBottom}>
+    <Container color={props.color} marginBottom={props?.marginBottom} onClick={props.onClick}>
       <IconWrapper width="56px" height="56px" color={props.color}>
         {props.icon}
       </IconWrapper>
