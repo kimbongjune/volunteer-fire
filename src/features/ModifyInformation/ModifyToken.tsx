@@ -22,11 +22,17 @@ const ModifyToken = () => {
   const updateToken = async () => {
     try {
       //앱과 통신하여 새로운 토큰을 받아오고 state에 저장함
-      setNewToken("새로운 토큰")
+      if (window.fireAgency && window.fireAgency.requestUpdateFcmToken) {
+        window.fireAgency.requestUpdateFcmToken();
+      }
     } catch (error) {
       // 에러 처리
       console.error('Failed to fetch user info status:', error);
     }
+  };
+
+  window.updateToken = (token: string) => {
+    setNewToken(token)
   };
 
   const updateUserInfo = async () => {

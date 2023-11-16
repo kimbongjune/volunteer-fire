@@ -8,11 +8,13 @@ import Button from '@/common/components/Button/Button';
 import { useRouter } from 'next/router';
 import axios from "../../common/components/api/axios"
 import { useSelector } from 'react-redux';
-import { RootState } from '../../app/store';
+import { RootState, persistor } from '../../app/store';
+import { useDispatch } from 'react-redux';
 import { saveTag, saveName, saveAddress, saveWorkAddress, saveGroup, savePhone, saveToken, saveMobilizationTotalCount, saveMobilizationAcceptCount, saveMobilizationDenyCount } from '../../features/slice/UserinfoSlice';
 
 const MyInfo = () => {
   const router = useRouter();
+  const dispatch = useDispatch()
 
   const tag = useSelector((state: RootState) => state.userReducer.tag);
   const group = useSelector((state: RootState) => state.userReducer.group);
@@ -20,7 +22,9 @@ const MyInfo = () => {
   const address = useSelector((state: RootState) => state.userReducer.address);
   const workAddress = useSelector((state: RootState) => state.userReducer.workAddress);
   const phone = useSelector((state: RootState) => state.userReducer.phone);
-  const token = useSelector((state: RootState) => state.userReducer.token);
+  const savedToken = useSelector((state: RootState) => state.userReducer.token);
+
+  const [token, setToken] = useState(savedToken)
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -36,6 +40,9 @@ const MyInfo = () => {
         //setAddress("실 거주지 주소")
         //setWorkAddress("직장 주소")
         //setToken("fcm 토큰")
+        if (window.fireAgency && window.fireAgency.requestGetToken) {
+          window.fireAgency.requestGetToken();
+        }
         //setMobilizationTotalCount("동원 총 개수")
         //setMobilizationAcceptCount("동원 수락 개수")
         //setMobilizationDenyCount("동원 거절 개수")
@@ -48,6 +55,22 @@ const MyInfo = () => {
     fetchUserInfo()
   });
 
+  window.updateToken = (token: string) => {
+    setToken(token)
+    dispatch(saveToken(token));
+  };
+
+  const logOut =() =>{
+    persistor.purge();
+    if (window.fireAgency && window.fireAgency.logout) {
+      window.fireAgency.logout();
+    }
+    if (window.fireAgency && window.fireAgency.stopLocationService) {
+      window.fireAgency.stopLocationService();
+    }
+    router.push('/logIn')
+  }
+
   return (
     <Flex direction="column" gap="8px" w="100%" h="100%">
       <MyInfoDetail 
@@ -59,7 +82,7 @@ const MyInfo = () => {
         workAddress={workAddress}
       />
       <MyToken token={token} />
-      <Button onClick={() => router.push('/logIn')} height="56px" backgroundColor={theme.colors[3]} padding="16px" margin="auto 0 0">
+      <Button onClick={() => logOut()} height="56px" backgroundColor={theme.colors[3]} padding="16px" margin="auto 0 0">
         <Text>로그아웃</Text>
       </Button>
     </Flex>
