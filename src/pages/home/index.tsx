@@ -7,18 +7,28 @@ import Mobilization from '@/features/Mobilization/Mobilization';
 import MyInfo from '@/features/MyInfo/MyInfo';
 import { useRouter } from 'next/router';
 import axios from "../../common/components/api/axios"
+import { useSelector } from 'react-redux';
+import { setDisasterNumber, setDisasterCoordinateX, setDisasterCoordinateY, setDisasterAccptFlag, setDisasterInfoReadFlag, setDisasterModalReadFlag, setDisasterAddress } from '../../features/slice/disasterSlice';
+import { RootState } from '../../app/store';
 import { useDispatch } from 'react-redux';
-import { setDisasterNumber } from '../../features/slice/disasterSlice';
 
 const HomePage = () => {
   const { query } = useRouter();
-  const router = useRouter();
   const menu = query.menu;
   // 동원상태를 관리하기위한 임시쿼리스트링 (동원요청알림을 받아 승인을 눌렀을때)
+
+  const disasterAccptFlag = useSelector((state: RootState) => state.disaster.disasterAcceptFlag);
+  const disasterInfoReadFlag = useSelector((state: RootState) => state.disaster.disasterInfoReadFlag);
+  const disasterModalReadFlag = useSelector((state: RootState) => state.disaster.disasterModalReadFlag);
+
   const [isRequest, setIsRequest] = useState(false);
-  const [hasRead, setHasRead] = useState(false); // 추가된 상태
-  const [isApproved, setIsApproved] = useState(false); // 승인 상태 초기화
-  const [mobilizationStatus, setMobilizationStatus] = useState(false);
+  const [hasRead, setHasRead] = useState(disasterModalReadFlag); // 추가된 상태
+  const [isApproved, setIsApproved] = useState(disasterAccptFlag); // 승인 상태 초기화
+  const [mobilizationStatus, setMobilizationStatus] = useState(disasterInfoReadFlag);
+
+  const [address, setAddress] = useState("")
+  const [title, setTitle] = useState("")
+  const [time, setTime] = useState("")
 
   console.log("mobilizationStatus",mobilizationStatus)
 
@@ -35,6 +45,13 @@ const HomePage = () => {
         setIsRequest(true)
         //전역 재난번호 저장
         dispatch(setDisasterNumber("test"));
+        //재난 좌표 저장
+        dispatch(setDisasterCoordinateX(36.4856398));
+        dispatch(setDisasterCoordinateY(127.2590765));
+        dispatch(setDisasterAddress("세종특별자치시 한누리대로 234"))
+        setAddress("세종특별자치시 한누리대로 234")
+        setTitle("공장화재")
+        setTime("2023년11월16일 오후2시 16분")
         //재난이 없어질 경우 재난번호 초기화
         //dispatch(setDisasterNumber(''));
         //동원 응답 을 읽었으면(모달 클릭) true 안 읽었으면 false
@@ -62,17 +79,33 @@ const HomePage = () => {
   // Modal을 닫을 때 호출되는 함수
   const handleModalClose = () => {
     setHasRead(true); // 모달을 읽었다는 정보를 true로 설정
+    dispatch(setDisasterModalReadFlag(true))
+    dispatch(setDisasterInfoReadFlag(true))
   };
 
   const handleApprovalChange  = (approvalStatus:React.SetStateAction<boolean>) => {
     setIsApproved(approvalStatus); //재난정보 수신 여부 변경
     console.log("approvalStatus@@@@@@@@@@@@@@@@@@@@@@@@@@@@@: " + approvalStatus)
+    console.log("isApproved@@@@@@@@@@@@@@@@@@@@@@@@@@@@@: " + isApproved)
     //재난 참여 안할시 저장 재난번호 초기화
     if(!approvalStatus){
       dispatch(setDisasterNumber(""));
+    }else{
+      if (window.fireAgency && window.fireAgency.startLocationService) {
+        window.fireAgency.startLocationService();
+      }
     }
     //router.replace(`/home?menu=mobilization&status=${approvalStatus}`)
   };
+
+  useEffect(() => {
+    dispatch(setDisasterAccptFlag(isApproved));
+    if(!isApproved){
+      if (window.fireAgency && window.fireAgency.stopLocationService) {
+        window.fireAgency.stopLocationService();
+      }
+    }
+  },[isApproved])
 
   //TODO 특정 상황에 하위 페이지 이동 금지
   return (
@@ -81,7 +114,7 @@ const HomePage = () => {
         <HomeMenu />
         <Children>
           {/* 홈 - 동원 */}
-          {menu === 'mobilization' && <Mobilization mobilizationStatus={mobilizationStatus} onMobilizationStatusChange={setMobilizationStatus} isRequest={isRequest} hasRead={hasRead} onModalClose={handleModalClose} isApproved={isApproved} onApprovalChange={handleApprovalChange} />}
+          {menu === 'mobilization' && <Mobilization time={time} address={address} title={title} mobilizationStatus={mobilizationStatus} onMobilizationStatusChange={setMobilizationStatus} isRequest={isRequest} hasRead={hasRead} onModalClose={handleModalClose} isApproved={isApproved} onApprovalChange={handleApprovalChange} />}
           {/* 홈 - CPR */}
           {menu === 'cpr' && <CPR />}
           {/* 홈 - 내정보 */}
