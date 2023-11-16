@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Axios 인스턴스를 생성
 const axiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://run.mocky.io/v3',
 });
 
 // 요청 인터셉터를 추가하여 모든 요청에 토큰을 포함
