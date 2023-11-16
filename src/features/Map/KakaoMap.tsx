@@ -42,13 +42,9 @@ const KakaoMap = (props: Props) => {
 
   const userLocationX = useSelector((state: RootState) => state.userReducer.userLocationX);
   const userLocationY = useSelector((state: RootState) => state.userReducer.userLocationY);
-  const gpsStatusSatelliteCount = useSelector((state: RootState) => state.userReducer.gpsStatusSatelliteCount);
-  const gpsStatusDbHzAverage = useSelector((state: RootState) => state.userReducer.gpsStatusDbHzAverage);
 
   console.log("userLocationX", userLocationX)
   console.log("userLocationY", userLocationY)
-  console.log("gpsStatusSatelliteCount", gpsStatusSatelliteCount)
-  console.log("gpsStatusDbHzAverage", gpsStatusDbHzAverage)
 
   if (userLocationX && userLocationY) {
     console.log("?????")
@@ -127,11 +123,11 @@ const KakaoMap = (props: Props) => {
         let circle = new window.kakao.maps.Circle({
           center : markerPosition,  // 원의 중심좌표 입니다 
           radius: 200, // 미터 단위의 원의 반지름입니다 
-          strokeWeight: 5, // 선의 두께입니다 
-          strokeColor: '#75B8FA', // 선의 색깔입니다
+          strokeWeight: 2, // 선의 두께입니다 
+          strokeColor: '#DE9898', // 선의 색깔입니다
           strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
-          strokeStyle: 'dashed', // 선의 스타일 입니다
-          fillColor: '#CFE7FF', // 채우기 색깔입니다
+          strokeStyle: 'solid', // 선의 스타일 입니다
+          fillColor: '#DE9898', // 채우기 색깔입니다
           fillOpacity: 0.7  // 채우기 불투명도 입니다   
         }); 
         circle.setMap(mapInstance.current);

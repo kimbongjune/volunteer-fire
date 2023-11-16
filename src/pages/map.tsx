@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import theme from '@/theme/colors';
 import Navbar from '@/common/components/Navbar/Navbar';
@@ -11,7 +11,7 @@ import FireTruck from '../../public/images/icons/fireTruck.svg';
 import WaterDrop from '../../public/images/icons/waterDrop.svg';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
-
+import Satellite from '../../public/images/icons/satellite.svg';
 import { useDispatch } from 'react-redux';
 import { setDisasterWaterMakrerShowFlag, setDisasterVehicleMarkerShowFlag } from '../features/slice/disasterSlice';
 
@@ -21,9 +21,25 @@ const MapPage = () => {
 
   const disasterWaterMakrerShowFlag =  useSelector((state: RootState) => state.disaster.disasterWaterMarkerShowFlag);
   const disasterVehicleMarkerShowFlag =  useSelector((state: RootState) => state.disaster.disasterVehicleMarkerShowFlag);
+  const gpsStatusSatelliteCount = useSelector((state: RootState) => state.userReducer.gpsStatusSatelliteCount);
+  const gpsStatusDbHzAverage = useSelector((state: RootState) => state.userReducer.gpsStatusDbHzAverage);
+
+
+  console.log("gpsStatusSatelliteCount", gpsStatusSatelliteCount)
+  console.log("gpsStatusDbHzAverage", gpsStatusDbHzAverage)
 
   const [isClickVehicle, setIsClickVehicle] = useState(disasterWaterMakrerShowFlag);
   const [isClickWater, setIsClickWater] = useState(disasterVehicleMarkerShowFlag);
+  const [isReceivingGPS, setIsReceivingGPS] = useState(true);
+
+  useEffect(() => {
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@",gpsStatusDbHzAverage)
+    if(gpsStatusDbHzAverage >= 30){
+      setIsReceivingGPS(true);
+    }else{
+      setIsReceivingGPS(false);
+    }
+  }, [gpsStatusDbHzAverage]);
 
   dispatch(setDisasterWaterMakrerShowFlag(isClickWater))
   dispatch(setDisasterVehicleMarkerShowFlag(isClickVehicle))
@@ -63,7 +79,11 @@ const MapPage = () => {
       </Container>
 
       <Map isClickVehicle={isClickVehicle} isClickWate={isClickWater} coordinateX={disasterCoordinateX} coordinateY={disasterCoordinateY} />
-
+      <GPSWrapper isActive={isReceivingGPS}>
+        <IconWrapper width="24px" height="24px" color={theme.colors.white}>
+          <Satellite />
+        </IconWrapper>
+      </GPSWrapper>
       <NavbarWrapper>
         <Navbar />
       </NavbarWrapper>
@@ -72,6 +92,25 @@ const MapPage = () => {
 };
 
 export default MapPage;
+
+const GPSWrapper = styled.div<{ isActive?: boolean }>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  right: 16px;
+  bottom: 97px;
+  z-index: 1;
+  padding: 16px;
+  border-radius: 44px;
+  background: ${theme.colors.orange};
+  box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.25);
+  ${({ isActive }) =>
+    isActive &&
+    `
+    background: ${theme.colors.green};
+  `}
+`;
 
 const Container = styled.div`
   position: fixed;
