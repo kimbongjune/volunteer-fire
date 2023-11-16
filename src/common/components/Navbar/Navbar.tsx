@@ -9,6 +9,8 @@ import Home from '../../../../public/images/icons/home.svg';
 import Map from '../../../../public/images/icons/map.svg';
 import Imagesmode from '../../../../public/images/icons/imagesmode.svg';
 import Video from '../../../../public/images/icons/video.svg';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../app/store';
 
 interface Props {
   datas: { icon: ReactNode; text: string; route: string; path: string }[];
@@ -17,20 +19,33 @@ interface Props {
 const Navbar = (props: Props) => {
   const router = useRouter();
 
+  const disasterAccptFlag = useSelector((state: RootState) => state.disaster.disasterAcceptFlag);
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>, path: string) => {
+    if (!disasterAccptFlag) {
+      event.preventDefault(); // 재난 승인이 false일 때 이동 방지
+      if(!path.includes("/home")){
+        alert("동원 요청에 승인하지 않으면 사용할 수 없는 메뉴입니다.")
+        return;
+      }
+    }
+    router.push(path); // 재난 승인이 true일 때 해당 경로로 이동
+  };
+
   return (
     <Container>
       <Flex justifyContent="space-between">
         {props?.datas.map((data, index) => {
           const isSelected = router.asPath.startsWith(data.route);
           return (
-            <Link href={data.path} key={index}>
+            <div key={index} onClick={(e) => handleClick(e, data.path)}>
               <VStack w="52px" gap="4px">
                 <IconWrapper height="24px" width="24px" color={isSelected ? theme.colors.orange : theme.colors[2]}>
                   {data.icon}
                 </IconWrapper>
                 <Text isSelected={isSelected}>{data.text}</Text>
               </VStack>
-            </Link>
+            </div>
           );
         })}
       </Flex>
