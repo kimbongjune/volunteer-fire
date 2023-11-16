@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef } from 'react';
-
+import { useEffect, useRef, useState } from 'react';
+import axios from "../../common/components/api/axios"
+import { useSelector } from 'react-redux';
+import { RootState } from '../../app/store';
 declare global {
   interface Window {
     kakao: any;
@@ -12,7 +14,23 @@ interface Props {
   longitude?: number; //경도
   isClickVehicle: boolean;
   isClickWate: boolean;
+  
 }
+
+interface Location {
+  lat: string;
+  lon: string;
+  type: string;
+  id: string;
+}
+
+interface Markers {
+  location:any;
+  type: string;
+  id: string;
+}
+
+let northwardShift = 0; 
 
 const KakaoMap = (props: Props) => {
   const { latitude, longitude, isClickVehicle, isClickWate } = props;
@@ -20,6 +38,37 @@ const KakaoMap = (props: Props) => {
   const mapInstance = useRef<any>();
   const vehicleMarkers = useRef<any[]>([]);
   const waterMarkers = useRef<any[]>([]);
+  const userLocationMarker = useRef<any>(null);
+
+  const userLocationX = useSelector((state: RootState) => state.userReducer.userLocationX);
+  const userLocationY = useSelector((state: RootState) => state.userReducer.userLocationY);
+  const gpsStatusSatelliteCount = useSelector((state: RootState) => state.userReducer.gpsStatusSatelliteCount);
+  const gpsStatusDbHzAverage = useSelector((state: RootState) => state.userReducer.gpsStatusDbHzAverage);
+
+  console.log("userLocationX", userLocationX)
+  console.log("userLocationY", userLocationY)
+  console.log("gpsStatusSatelliteCount", gpsStatusSatelliteCount)
+  console.log("gpsStatusDbHzAverage", gpsStatusDbHzAverage)
+
+  if (userLocationX && userLocationY) {
+    console.log("?????")
+    const position = new window.kakao.maps.LatLng(userLocationX, userLocationY);
+    const imageSize = new window.kakao.maps.Size(24, 35); // 마커의 크기 설정
+    const imageOption = { offset: new window.kakao.maps.Point(12, 35) }; // 마커의 옵션 설정
+    const markerImage = createMarkerImage('/images/icons/flag.svg', imageSize, imageOption);
+    const marker = createMarker(position, markerImage);
+
+    marker.setMap(null)
+
+    // 새로운 마커를 지도에 추가하고, 참조를 업데이트합니다.
+    marker.setMap(mapInstance.current);
+    userLocationMarker.current = marker;
+    // 여기서 마커 생성 로직을 실행
+  } else {
+    console.log("사용자 위치가 유효하지 않습니다.");
+  }
+
+  const [carMarkers, setCarMarkers] = useState<Markers[]>([])
 
   function changeImage(src: string) {
     let imgSrc = src;
@@ -74,8 +123,74 @@ const KakaoMap = (props: Props) => {
           image: createMarkerImage('/images/icons/makerImage.svg', markerSize, markerOption),
         });
         marker.setMap(mapInstance.current);
+
+        let circle = new window.kakao.maps.Circle({
+          center : markerPosition,  // 원의 중심좌표 입니다 
+          radius: 200, // 미터 단위의 원의 반지름입니다 
+          strokeWeight: 5, // 선의 두께입니다 
+          strokeColor: '#75B8FA', // 선의 색깔입니다
+          strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+          strokeStyle: 'dashed', // 선의 스타일 입니다
+          fillColor: '#CFE7FF', // 채우기 색깔입니다
+          fillOpacity: 0.7  // 채우기 불투명도 입니다   
+        }); 
+        circle.setMap(mapInstance.current);
+
+        const zoomControl = new window.kakao.maps.ZoomControl();
+        map.addControl(zoomControl, window.kakao.maps.ControlPosition.BOTTOMLEFT);
+
+        const mapTypeControl = new window.kakao.maps.MapTypeControl();
+        map.addControl(mapTypeControl, window.kakao.maps.ControlPosition.BOTTOMRIGHT);
+
+        fetchWaterSources().then(waterSources => {
+          waterSources.forEach(waterSource => {
+            var imageSize = new window.kakao.maps.Size(48, 48);
+            var markerImage = createMarkerImage(waterSource.type, imageSize, null),
+            marker = createMarker(waterSource.location, markerImage);
+            waterMarkers.current.push(marker);
+            if (isClickWate) marker.setMap(mapInstance.current);
+          });
+        }).catch(error => {
+          return;
+        });
+
+        if (window.fireAgency && window.fireAgency.getLastLocation) {
+          const location = window.fireAgency.getLastLocation();
+          console.log("location", location)
+          if(location != ""){
+            const [locationX, locationY] = location.split(" ")
+            const position = new window.kakao.maps.LatLng(locationX, locationY);
+            const imageSize = new window.kakao.maps.Size(100, 100); // 마커의 크기 설정
+            const imageOption = { offset: new window.kakao.maps.Point(100/2, 100/2) }; // 마커의 옵션 설정
+            const markerImage = createMarkerImage('/images/icons/Ripple-3.1s-354px.gif', imageSize, imageOption);
+            const marker = createMarker(position, markerImage);
+
+            marker.setMap(null)
+
+            // 새로운 마커를 지도에 추가하고, 참조를 업데이트합니다.
+            marker.setMap(mapInstance.current);
+            userLocationMarker.current = marker;
+          }
+        }
+
+        // 차량 위치 정보 갱신
+        const updateVehicleMarkers = () => {
+          fetchVehicleLocations().then(vehicleLocations => {
+            vehicleMarkers.current.forEach(marker => marker.setMap(null));
+            vehicleMarkers.current = []; // 마커 배열 초기화
+            setCarMarkers(vehicleLocations)
+          }).catch(error => {
+            return;
+          });
+        };
+
+        updateVehicleMarkers();
+        const vehicleInterval = setInterval(updateVehicleMarkers, 10000);
+
+        return () => clearInterval(vehicleInterval);
         // 마커 초기화
-        initializeMarkers();
+        //initializeMarkers();
+        //toggleMarkers();
       });
     };
 
@@ -84,60 +199,83 @@ const KakaoMap = (props: Props) => {
     };
   }, []);
 
-  // 마커 초기화 함수
-  const initializeMarkers = () => {
-
-    let vehiclePositions = [
-      {
-        location: new window.kakao.maps.LatLng(37.518195, 127.071881),
-        type: '탱크',
-      },
-    ];
-    
-    // 소방 용수마커가 표시될 좌표 배열
-    let waterPositions = [
-      {
-        location: new window.kakao.maps.LatLng(37.516386, 127.079452),
-        type: '지상',
-      },
-      {
-        location: new window.kakao.maps.LatLng(37.515658, 127.077578),
-        type: '지하',
-      },
-    ];
-
-    function createWatersMarkers() {
-      for (var i = 0; i < waterPositions.length; i++) {
-        var imageSize = new window.kakao.maps.Size(48, 48);
-
-        // 마커이미지와 마커를 생성합니다
-        var markerImage = createMarkerImage(waterPositions[i].type, imageSize, null),
-          marker = createMarker(waterPositions[i].location, markerImage);
-
-        // 생성된 마커를 편의점 마커 배열에 추가합니다
-        waterMarkers.current.push(marker);
-      }
-    }
-
-    function createVehicleMarkers() {
-      for (var i = 0; i < vehiclePositions.length; i++) {
-        var imageSize = new window.kakao.maps.Size(48, 48);
-
-        // 마커이미지와 마커를 생성합니다
-        var markerImage = createMarkerImage(vehiclePositions[i].type, imageSize, null),
-          marker = createMarker(vehiclePositions[i].location, markerImage);
-
-        // 생성된 마커를 편의점 마커 배열에 추가합니다
-        vehicleMarkers.current.push(marker);
-      }
-    }
-
-    createWatersMarkers()
-    createVehicleMarkers()
+  useEffect(() => {
+    console.log("Effect 실행됨", userLocationX, userLocationY, mapInstance.current);
   
-    // 마커를 지도에 표시하거나 제거하는 기능
-    toggleMarkers();
-  };
+    if (!window.kakao || !window.kakao.maps) {
+      console.log("카카오 맵 객체가 없습니다.");
+      return;
+    }
+  
+    if (mapInstance.current) {
+      console.log("지도 인스턴스 존재함", mapInstance.current);
+    } else {
+      console.log("지도 인스턴스가 준비되지 않았습니다.");
+      return;
+    }
+  
+    if (userLocationX && userLocationY) {
+      console.log("?????")
+      const position = new window.kakao.maps.LatLng(userLocationX, userLocationY);
+      const imageSize = new window.kakao.maps.Size(24, 35); // 마커의 크기 설정
+      const imageOption = { offset: new window.kakao.maps.Point(12, 35) }; // 마커의 옵션 설정
+      const markerImage = createMarkerImage('/images/icons/flag.svg', imageSize, imageOption);
+      const marker = createMarker(position, markerImage);
+  
+      // 새로운 마커를 지도에 추가하고, 참조를 업데이트합니다.
+      marker.setMap(mapInstance.current);
+      userLocationMarker.current = marker;
+      // 여기서 마커 생성 로직을 실행
+    } else {
+      console.log("사용자 위치가 유효하지 않습니다.");
+    }
+  }, [userLocationX, userLocationY]);
+
+  useEffect(() => {
+    carMarkers.forEach(vehicle => {
+      var imageSize = new window.kakao.maps.Size(48, 48);
+      var markerImage = createMarkerImage(vehicle.type, imageSize, null),
+      marker = createMarker(vehicle.location, markerImage);
+      vehicleMarkers.current.push(marker);
+      if (isClickVehicle) marker.setMap(mapInstance.current);
+    });
+  },[carMarkers, isClickVehicle])
+
+  async function fetchWaterSources() {
+    // 실제 API 호출 로직
+    // 예시로는 가상의 데이터 반환
+    try {
+      const result = await axios.get<Location[]>("/ab3f21a4-6d88-4ae1-9c1d-c1b4dd1596ca");
+      console.log(result.data)
+      const data = result.data;
+      return data.map(item => ({
+        location: new window.kakao.maps.LatLng(parseFloat(item.lat), parseFloat(item.lon)),
+        type: item.type,
+        id : item.id
+      }));
+    } catch (error) {
+      console.error(error)
+      return []
+    }
+  }
+  
+  // 차량 위치 정보 API 호출 함수
+  async function fetchVehicleLocations() {
+    // 실제 API 호출 로직
+    // 예시로는 가상의 데이터 반환
+    try {
+      const result = await axios.get<Location[]>("/c02f9a38-3a97-481c-bb6c-bd5d79179def");
+      const data = result.data;
+      northwardShift += 0.00009;
+      return data.map(item => ({
+        location: new window.kakao.maps.LatLng(parseFloat(item.lat) + northwardShift, parseFloat(item.lon)),
+        type: item.type,
+        id : item.id
+      }));
+    } catch (error) {
+      return []
+    }
+  }
 
   // 마커 표시 상태를 업데이트하는 함수
   const toggleMarkers = () => {
@@ -167,5 +305,5 @@ export default KakaoMap;
 
 const MapContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 81px);
 `;

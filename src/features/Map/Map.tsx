@@ -1,14 +1,16 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-const KakaoMap = dynamic(() => import('./KakaoMap'), { ssr: false });
+const KakaoMap = dynamic(async () => await import('./KakaoMap'), { ssr: false });
 
 interface Props {
   isClickVehicle: boolean;
   isClickWate: boolean;
+  coordinateX:number;
+  coordinateY:number;
 }
 
 const Map = (props: Props) => {
-  return <KakaoMap latitude={37.516633} longitude={127.077374} isClickVehicle={props.isClickVehicle} isClickWate={props.isClickWate} />;
+  return <KakaoMap latitude={props.coordinateX} longitude={props.coordinateY} isClickVehicle={props.isClickVehicle} isClickWate={props.isClickWate} />;
 };
 
 export default Map;

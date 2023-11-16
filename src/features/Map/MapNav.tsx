@@ -4,18 +4,38 @@ import theme from '@/theme/colors';
 import { Flex } from '@chakra-ui/react';
 import Button from '@/common/components/Button/Button';
 import Image from 'next/image';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../app/store';
 
 const MapNav = () => {
+
+  const disasterAddress = useSelector((state: RootState) => state.disaster.disasterAddress);
+  const disasterCoordinateX = useSelector((state: RootState) => state.disaster.disasterCoordinateX);
+  const disasterCoordinateY = useSelector((state: RootState) => state.disaster.disasterCoordinateY);
+
+  const copyClipboard = () =>{
+    if (window.fireAgency && window.fireAgency.copyClipboard) {
+      window.fireAgency.copyClipboard(disasterAddress);
+    }
+  }
+
+  const openThirdPartyMapApplication = (mapType:string) =>{
+    if (window.fireAgency && window.fireAgency.openThirdPartyMapApplication) {
+      console.log(disasterCoordinateX, disasterCoordinateY)
+      window.fireAgency.openThirdPartyMapApplication(mapType, disasterCoordinateY.toString(), disasterCoordinateX.toString(), disasterAddress);
+    }
+  }
+
   return (
     <Container>
       <Flex gap="12px">
-        <Image width={36} height={36} src="/images/icons/naverMap.png" alt="네이버지도앱" />
-        <Image width={36} height={36} src="/images/icons/Tmap.png" alt="티맵" />
-        <Image width={36} height={36} src="/images/icons/kakaoMap.png" alt="카카오지도앱" />
-        <Image width={36} height={36} src="/images/icons/map.png" alt="지도앱" />
+        <Image width={36} height={36} src="/images/icons/naverMap.png" alt="네이버지도앱" onClick={() => openThirdPartyMapApplication("naver")}/>
+        <Image width={36} height={36} src="/images/icons/Tmap.png" alt="티맵" onClick={() => openThirdPartyMapApplication("tmap")}/>
+        <Image width={36} height={36} src="/images/icons/kakaoMap.png" alt="카카오지도앱" onClick={() => openThirdPartyMapApplication("kakao")}/>
+        <Image width={36} height={36} src="/images/icons/map.png" alt="지도앱" onClick={() => openThirdPartyMapApplication("onenavi")}/>
       </Flex>
-      <ButtonWrapper>
-        <Button backgroundColor={theme.colors[6]} height="36px" padding="8px 16px" borderRadius="4px">
+      <ButtonWrapper onClick={copyClipboard}>
+        <Button backgroundColor={theme.colors[6]} height="36px" padding="8px 16px" borderRadius="4px"  onClick={copyClipboard}>
           <ButtonText>주소복사</ButtonText>
         </Button>
       </ButtonWrapper>
