@@ -13,6 +13,10 @@ interface MyInfoState {
   mobilizationTotalCount: number;
   mobilizationAcceptCount: number;
   mobilizationDenyCount: number;
+  userLocationX:number;
+  userLocationY:number;
+  gpsStatusSatelliteCount:number;
+  gpsStatusDbHzAverage:number;
 }
 
 // Define the initial state using that type
@@ -27,6 +31,10 @@ const initialState: MyInfoState = {
   mobilizationTotalCount: 0,
   mobilizationAcceptCount: 0,
   mobilizationDenyCount: 0,
+  userLocationX:0.0,
+  userLocationY:0.0,
+  gpsStatusSatelliteCount:0,
+  gpsStatusDbHzAverage:0.0
 };
 
 export const myInfoSlice = createSlice({
@@ -63,6 +71,18 @@ export const myInfoSlice = createSlice({
     saveMobilizationDenyCount: (state, action: PayloadAction<number>) => {
       state.mobilizationDenyCount = action.payload;
     },
+    saveUserLocationX: (state, action: PayloadAction<number>) => {
+      state.userLocationX = action.payload;
+    },
+    saveUserLocationY: (state, action: PayloadAction<number>) => {
+      state.userLocationY = action.payload;
+    },
+    saveGpsStatusSatelliteCount: (state, action: PayloadAction<number>) => {
+      state.gpsStatusSatelliteCount = action.payload;
+    },
+    saveGpsStatusDbHzAverage: (state, action: PayloadAction<number>) => {
+      state.gpsStatusDbHzAverage = action.payload;
+    },
   },
 });
 
@@ -77,7 +97,11 @@ export const {
   saveToken, 
   saveMobilizationTotalCount, 
   saveMobilizationAcceptCount, 
-  saveMobilizationDenyCount 
+  saveMobilizationDenyCount,
+  saveUserLocationX,
+  saveUserLocationY,
+  saveGpsStatusSatelliteCount,
+  saveGpsStatusDbHzAverage
 } = myInfoSlice.actions;
 
 export default myInfoSlice.reducer;
