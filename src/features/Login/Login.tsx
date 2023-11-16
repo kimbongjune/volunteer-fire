@@ -44,6 +44,9 @@ const Login = () => {
       //   password,
       // });
       //TODO 성공적으로 로그인되면 JWT 토큰을 앱의 roomdb에 저장
+      if (window.fireAgency && window.fireAgency.saveUserData) {
+        window.fireAgency.saveUserData(username, password, checked, "test_token");
+      }
       router.replace('/home?menu=mobilization');
     } catch (error) {
       // 오류가 발생했을 경우 오류 메시지를 설정
