@@ -12,11 +12,25 @@ import WaterDrop from '../../public/images/icons/waterDrop.svg';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 
+import { useDispatch } from 'react-redux';
+import { setDisasterWaterMakrerShowFlag, setDisasterVehicleMarkerShowFlag } from '../features/slice/disasterSlice';
+
 const MapPage = () => {
-  const [isClickVehicle, setIsClickVehicle] = useState(false);
-  const [isClickWater, setIsClickWater] = useState(false);
+
+  const dispatch = useDispatch()
+
+  const disasterWaterMakrerShowFlag =  useSelector((state: RootState) => state.disaster.disasterWaterMarkerShowFlag);
+  const disasterVehicleMarkerShowFlag =  useSelector((state: RootState) => state.disaster.disasterVehicleMarkerShowFlag);
+
+  const [isClickVehicle, setIsClickVehicle] = useState(disasterWaterMakrerShowFlag);
+  const [isClickWater, setIsClickWater] = useState(disasterVehicleMarkerShowFlag);
+
+  dispatch(setDisasterWaterMakrerShowFlag(isClickWater))
+  dispatch(setDisasterVehicleMarkerShowFlag(isClickVehicle))
 
   const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
+  const disasterCoordinateX = useSelector((state: RootState) => state.disaster.disasterCoordinateX);
+  const disasterCoordinateY = useSelector((state: RootState) => state.disaster.disasterCoordinateY);
   console.log("disasterNumber = " + disasterNumber)
 
   return (
@@ -48,7 +62,7 @@ const MapPage = () => {
         </Flex>
       </Container>
 
-      <Map isClickVehicle={isClickVehicle} isClickWate={isClickWater} />
+      <Map isClickVehicle={isClickVehicle} isClickWate={isClickWater} coordinateX={disasterCoordinateX} coordinateY={disasterCoordinateY} />
 
       <NavbarWrapper>
         <Navbar />
