@@ -56,7 +56,7 @@ const ModifyToken = () => {
   return (
     <VStack gap="8px" h="100%">
       <TokenBox>
-        <Flex justifyContent="space-between" alignItems="center">
+        <Flex justifyContent="space-between" alignItems="center" gap="51px">
           <Title>등록된 토큰</Title>
           <Token>{token}</Token>
         </Flex>
@@ -71,7 +71,7 @@ const ModifyToken = () => {
       </TokenBox>
 
       <TokenBox>
-        <Flex justifyContent="space-between" alignItems="center">
+        <Flex justifyContent="space-between" alignItems="center" gap="33px">
           <Title>새로 생성된 토큰</Title>
           {newToken&& <NewToken>{newToken}</NewToken>}
           {!newToken && <NewToken>-</NewToken>}
@@ -102,6 +102,7 @@ const Title = styled.div`
   font-weight: normal;
   line-height: 24px;
   letter-spacing: -0.32px;
+  flex-shrink: 0;
 `;
 
 const Token = styled.div`
@@ -112,6 +113,9 @@ const Token = styled.div`
   font-weight: normal;
   line-height: 24px;
   letter-spacing: -0.32px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 const TokenButton = styled.button`
@@ -137,6 +141,9 @@ const NewToken = styled.div`
   font-weight: normal;
   line-height: 24px;
   letter-spacing: -0.32px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 const ButtonText = styled.span`

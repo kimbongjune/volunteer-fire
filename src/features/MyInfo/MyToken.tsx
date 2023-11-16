@@ -16,9 +16,9 @@ const MyToken = (props: Props) => {
   return (
     <Container onClick={() => router.push(`/home/modifyInfo?menu=token&param=${props.token}`)}>
       <Title>토큰 정보</Title>
-      <Flex justifyContent="space-between">
+      <Flex justifyContent="space-between" gap="31px">
         <SubTitle>등록된 토큰</SubTitle>
-        <Flex gap="4px" alignItems="center">
+        <Flex gap="4px" alignItems="center" overflow="hidden">
           <Token>{props?.token}</Token>
           <IconWrapper width="16px" height="16px" color={theme.colors[3]}>
             <Copy />
@@ -61,6 +61,7 @@ const SubTitle = styled.div`
   font-weight: normal;
   line-height: 24px;
   letter-spacing: -0.32px;
+  flex-shrink: 0;
 `;
 
 const Token = styled.div`
@@ -71,4 +72,8 @@ const Token = styled.div`
   font-weight: normal;
   line-height: 24px;
   letter-spacing: -0.32px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
 `;
