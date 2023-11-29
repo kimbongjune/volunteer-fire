@@ -1,5 +1,6 @@
 // src/features/slice/myInfoSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { FirevolunDto, HsaverDto } from '../types/types';
 
 // Define a type for the slice state
 interface MyInfoState {
@@ -17,7 +18,44 @@ interface MyInfoState {
   userLocationY:number;
   gpsStatusSatelliteCount:number;
   gpsStatusDbHzAverage:number;
+  volunteerUserData:FirevolunDto
+  hSaverUserData:HsaverDto
+  logedIn:boolean;
+  userType:string
 }
+
+const volunteerUserInfo: FirevolunDto = {
+  appUserId: '',
+  volunName: '',
+  jurisWardId: '',
+  teamId: '',
+  volunPosition: '',
+  volunBunjiAdress: '',
+  volunDoroAdress: '',
+  volunTel: '',
+  fcmToken: '',
+  reqTsTime: 0,
+  accTsTime: 0,
+  dnyTsTime: 0,
+  userType: '',
+};
+
+const hSaverUserInfo: HsaverDto = {
+  appUserId: "",
+  nmPerson: "",
+  jurisWardId: "",
+  nmPlace: "",
+  liveBunjiAdress: "",
+  liveDoroAdress: "",
+  workBunjiAdress: "",
+  workDoroAdress: "",
+  tel: "",
+  fcmToken: "",
+  reqTsTime: 0,
+  accTsTime: 0,
+  dnyTsTime: 0,
+  userType: ""
+};
 
 // Define the initial state using that type
 const initialState: MyInfoState = {
@@ -34,7 +72,11 @@ const initialState: MyInfoState = {
   userLocationX:0.0,
   userLocationY:0.0,
   gpsStatusSatelliteCount:0,
-  gpsStatusDbHzAverage:0.0
+  gpsStatusDbHzAverage:0.0,
+  volunteerUserData :volunteerUserInfo,
+  hSaverUserData:hSaverUserInfo,
+  logedIn:false,
+  userType:''
 };
 
 export const myInfoSlice = createSlice({
@@ -83,6 +125,19 @@ export const myInfoSlice = createSlice({
     saveGpsStatusDbHzAverage: (state, action: PayloadAction<number>) => {
       state.gpsStatusDbHzAverage = action.payload;
     },
+    saveVolunteerFireUserInfo: (state, action: PayloadAction<FirevolunDto>) => {
+      state.volunteerUserData = action.payload;
+    },
+    saveHSaverUserInfo: (state, action: PayloadAction<HsaverDto>) => {
+      state.hSaverUserData = action.payload;
+    },
+    saveLogedInStatus: (state, action: PayloadAction<boolean>) => {
+      state.logedIn = action.payload;
+    },
+    saveUserType: (state, action: PayloadAction<string>) => {
+      state.userType = action.payload;
+    },
+
   },
 });
 
@@ -101,7 +156,11 @@ export const {
   saveUserLocationX,
   saveUserLocationY,
   saveGpsStatusSatelliteCount,
-  saveGpsStatusDbHzAverage
+  saveGpsStatusDbHzAverage,
+  saveVolunteerFireUserInfo,
+  saveHSaverUserInfo,
+  saveLogedInStatus,
+  saveUserType
 } = myInfoSlice.actions;
 
 export default myInfoSlice.reducer;
