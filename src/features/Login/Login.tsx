@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import theme from '@/theme/colors';
 import Input from '@/common/components/Input/input';
@@ -10,10 +10,17 @@ import IconWrapper from '@/common/components/IconWrapper/IconWrapper';
 import LoginFooter from './LoginFooter';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import axios from "../../common/components/api/axios"
+import axios, {setAuthToken} from "../../common/components/api/axios"
+import { UserData } from '../types/types';
+import { useDispatch } from 'react-redux';
+import { saveHSaverUserInfo, saveLogedInStatus, saveUserType, saveVolunteerFireUserInfo } from '../../features/slice/UserinfoSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
 
 const Login = () => {
   const router = useRouter();
+
+  const dispatch = useDispatch()
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -22,6 +29,13 @@ const Login = () => {
 
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  const isLoggedIn = useSelector((state: RootState) => state.userReducer.logedIn);
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.replace('/home?menu=mobilization'); // 로그인 상태라면 홈 페이지(또는 다른 페이지)로 리디렉션
+    }
+  }, [isLoggedIn, router]);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // 폼 제출 기본 이벤트를 방지
@@ -39,16 +53,34 @@ const Login = () => {
 
     //TODO 모든 입력이 제대로 되었다면 서버에 로그인 요청 및 네이티브의 vpn 로그인 같이 진행
     try {
-      // const response = await axios.post('/login', {
-      //   username,
-      //   password,
-      // });
-      //TODO 성공적으로 로그인되면 JWT 토큰을 앱의 roomdb에 저장
-      if (window.fireAgency && window.fireAgency.saveUserData) {
-        window.fireAgency.saveUserData(username, password, checked, "test_token");
+      const response = await axios.post<UserData>('/api/user/login/auth', {
+        userId: username,
+        userPassword : password,
+      });
+      
+      console.log(response.headers['authorization'])
+      localStorage.setItem("token", response.headers['authorization']);
+      setAuthToken(response.headers['authorization'])
+
+      const userType = response.data.userType
+      if(userType == "3"){
+        dispatch(saveHSaverUserInfo(response.data.dtoMap.hsaverDto))
+      }else{
+        dispatch(saveVolunteerFireUserInfo(response.data.dtoMap.firevolunDto))
       }
-      router.replace('/home?menu=mobilization');
+
+      dispatch(saveUserType(userType))
+
+      if (window.fireAgency && window.fireAgency.saveUserData) {
+        window.fireAgency.saveUserData(username, password, checked, response.headers['authorization']);
+      }
+      console.log(userType)
+
+      console.log("?")
+      
+      dispatch(saveLogedInStatus(true))
     } catch (error) {
+      console.log(error)
       // 오류가 발생했을 경우 오류 메시지를 설정
       setLoginError('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
       return;
