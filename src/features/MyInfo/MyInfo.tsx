@@ -10,7 +10,7 @@ import axios from "../../common/components/api/axios"
 import { useSelector } from 'react-redux';
 import { RootState, persistor } from '../../app/store';
 import { useDispatch } from 'react-redux';
-import { saveTag, saveName, saveAddress, saveWorkAddress, saveGroup, savePhone, saveToken, saveMobilizationTotalCount, saveMobilizationAcceptCount, saveMobilizationDenyCount } from '../../features/slice/UserinfoSlice';
+import { saveTag, saveName, saveAddress, saveWorkAddress, saveGroup, savePhone, saveToken, saveMobilizationTotalCount, saveMobilizationAcceptCount, saveMobilizationDenyCount, saveLogedInStatus } from '../../features/slice/UserinfoSlice';
 
 const MyInfo = () => {
   const router = useRouter();
@@ -68,6 +68,7 @@ const MyInfo = () => {
     if (window.fireAgency && window.fireAgency.stopLocationService) {
       window.fireAgency.stopLocationService();
     }
+    dispatch(saveLogedInStatus(false))
     router.push('/logIn')
   }
 

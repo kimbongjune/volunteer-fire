@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import { setDisasterNumber, setDisasterCoordinateX, setDisasterCoordinateY, setDisasterAccptFlag, setDisasterInfoReadFlag, setDisasterModalReadFlag, setDisasterAddress } from '../../features/slice/disasterSlice';
 import { RootState } from '../../app/store';
 import { useDispatch } from 'react-redux';
+import { saveHSaverUserInfo, saveVolunteerFireUserInfo } from '@/features/slice/UserinfoSlice';
 
 const HomePage = () => {
   const { query } = useRouter();
@@ -34,10 +35,35 @@ const HomePage = () => {
 
   const dispatch = useDispatch();
 
+  const userType = useSelector((state: RootState) => state.userReducer.userType);
+  const hSaverUserData = useSelector((state: RootState) => state.userReducer.hSaverUserData);
+  const volunteerUserData = useSelector((state: RootState) => state.userReducer.volunteerUserData);
+
   useEffect(() => {
+
+    if (window.fireAgency && window.fireAgency.requestGetToken) {
+      window.fireAgency.requestGetToken();
+    }
+    window.updateToken = (token: string) => {
+      if(userType === "3"){
+        dispatch(saveHSaverUserInfo({...hSaverUserData, fcmToken : token}))
+      }else{
+        dispatch(saveVolunteerFireUserInfo({...volunteerUserData, fcmToken : token}))
+      }
+    }; 
     // API 호출을 수행하는 함수
     const fetchMobilizationStatus = async () => {
       try {
+
+        if(userType === "3"){
+          const result = await axios.get("/api/mobilize/",{params : {userId : hSaverUserData.appUserId}})
+          console.log(result)
+        }else{
+          const result = await axios.get("/api/mobilize/",{params : {userId : volunteerUserData.appUserId}})
+          console.log(result)
+        }
+
+        
         //API 호출 로직
         console.log("동원 api 콜")
         //const response = await axios.get('/mobilization-status');
