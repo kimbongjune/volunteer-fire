@@ -8,13 +8,12 @@ export type CprItemType = {
   date: string;
   playTime: string;
   video: string;
-  poster: string;
 };
 
 const CprBox = (props: CprItemType) => {
   return (
     <Container>
-      <StyledVideo controls poster={props.poster}>
+      <StyledVideo controls>
           <source src={props.video} type="video/mp4"/>
         </StyledVideo>
       <DescriptionSection>
