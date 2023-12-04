@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Axios 인스턴스를 생성
 const axiosInstance = axios.create({
-  baseURL: 'http://121.152.148.227:18080/volfire-1.0.0-BUILD-SNAPSHOT',
-  //baseURL: 'http://192.168.10.210:8080/volfire-1.0.0-BUILD-SNAPSHOT',
+  //baseURL: 'http://112.25.1.94:8098/volunteer/',
+  baseURL: 'http://192.168.10.210:8080/volfire-1.0.0-BUILD-SNAPSHOT',
   //baseURL: 'http://localhost:8080/',
 });
 
