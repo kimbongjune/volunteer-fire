@@ -11,9 +11,8 @@ import LoginFooter from './LoginFooter';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import axios, {setAuthToken} from "../../common/components/api/axios"
-import { UserData } from '../types/types';
 import { useDispatch } from 'react-redux';
-import { saveHSaverUserInfo, saveLogedInStatus, saveUserType, saveVolunteerFireUserInfo } from '../../features/slice/UserinfoSlice';
+import { saveLogedInStatus, saveUserType } from '../../features/slice/UserinfoSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
 
@@ -53,7 +52,7 @@ const Login = () => {
 
     //TODO 모든 입력이 제대로 되었다면 서버에 로그인 요청 및 네이티브의 vpn 로그인 같이 진행
     try {
-      const response = await axios.post<UserData>('/api/user/login/auth', {
+      const response = await axios.post('/api/user/login/auth', {
         userId: username,
         userPassword : password,
       });
@@ -62,19 +61,6 @@ const Login = () => {
       localStorage.setItem("token", response.headers['authorization']);
       setAuthToken(response.headers['authorization'])
 
-      const userType = response.data.userType
-      if(userType == "3"){
-        dispatch(saveHSaverUserInfo(response.data.dtoMap.hsaverDto))
-      }else{
-        dispatch(saveVolunteerFireUserInfo(response.data.dtoMap.firevolunDto))
-      }
-
-      dispatch(saveUserType(userType))
-
-      if (window.fireAgency && window.fireAgency.saveUserData) {
-        window.fireAgency.saveUserData(username, password, checked, response.headers['authorization']);
-      }
-      console.log(userType)
 
       console.log("?")
       

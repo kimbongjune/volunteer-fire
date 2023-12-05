@@ -14,32 +14,63 @@ import { useDispatch } from 'react-redux';
 import { setDisasterAccptFlag } from '../../features/slice/disasterSlice';
 import axios from "../../common/components/api/axios"
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
+import { apiPostResponse } from '../types/types';
 
 const MobilizationStatus = () => {
-  const [isArriva, setIsArrival] = useState(false);
-  const [isDrawal, setIsDrawal] = useState(false);
   const dispatch = useDispatch()
   const router = useRouter(); 
 
-  const arrivalClick = () => {
+  const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
+  const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
+
+  console.log(userInfo)
+
+  const arrivalClick = async () => {
     //현장 도착 API 발송
-    console.log("현장 도착");
+    const approveResponse = await axios.post<apiPostResponse>("/api/mobilize/site",{
+      dsrSeq : disasterNumber,
+      flag : "Y",
+      userId : userInfo?.appUserId
+    })
+    // if (window.fireAgency && window.fireAgency.stopLocationService) {
+    //   window.fireAgency.stopLocationService();
+    // }
+
+    console.log(approveResponse.data)
   }
 
-  const withdrawalClick = () => {
+  const withdrawalClick = async () => {
     //현장 철수 API 발송
-    console.log("현장 철수");
+    const approveResponse = await axios.post<apiPostResponse>("/api/mobilize/site",{
+      dsrSeq : disasterNumber,
+      flag : "N",
+      userId : userInfo?.appUserId
+    })
+    // if (window.fireAgency && window.fireAgency.stopLocationService) {
+    //   window.fireAgency.stopLocationService();
+    // }
+
+    console.log(approveResponse.data)
   }
 
-  const cancelMobilization = () => {
+  const cancelMobilization = async () => {
     //동원 취소 API 발송
     console.log("동원 취소");
-    
-    dispatch(setDisasterAccptFlag(false))
-    router.replace('/home?menu=mobilization');
-    if (window.fireAgency && window.fireAgency.stopLocationService) {
-      window.fireAgency.stopLocationService();
+    const approveResponse = await axios.post<apiPostResponse>("/api/mobilize/mob",{
+      dsrSeq : disasterNumber,
+      flag : "N",
+      userId : userInfo?.appUserId
+    })
+    if(approveResponse.data.responseCode === 200){
+      dispatch(setDisasterAccptFlag(false))
+      router.replace('/home?menu=mobilization');
+      if (window.fireAgency && window.fireAgency.stopLocationService) {
+        window.fireAgency.stopLocationService();
+      }
     }
+    
   }
 
   return (

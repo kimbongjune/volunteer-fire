@@ -48,7 +48,7 @@ const MobilizationRequestHistory = (props:Props) => {
           <Count>{formatNumber(mobilizationTotalCount!!)}</Count>
         </Flex>
         <Flex justifyContent="space-between" marginBottom="8px">
-          <Text>요청 승읜 횟수</Text>
+          <Text>요청 승인 횟수</Text>
           <Count>{formatNumber(mobilizationAcceptCount!!)}</Count>
         </Flex>
         <Flex justifyContent="space-between">
@@ -56,14 +56,14 @@ const MobilizationRequestHistory = (props:Props) => {
           <Count>{formatNumber(mobilizationDenyCount!!)}</Count>
         </Flex>
       </Box>
-      <Button padding="8px" backgroundColor={theme.colors[3]} height="40px" onClick={fetchMobilizationStatus}>
+      {/* <Button padding="8px" backgroundColor={theme.colors[3]} height="40px" onClick={fetchMobilizationStatus}>
         <Flex justifyContent="center" gap="8px" alignItems="center">
           <IconWrapper width="20px" height="20px" color={theme.colors.white}>
             <Refresh />
           </IconWrapper>
           <ButtonText>정보 갱신하기</ButtonText>
         </Flex>
-      </Button>
+      </Button> */}
     </Container>
   );
 };

@@ -2,12 +2,14 @@ import React from 'react';
 import styled from '@emotion/styled';
 import theme from '@/theme/colors';
 import { VStack } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
 
 const Video = () => {
+  const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
   return (
     <VStack gap="8px" height="100%" overflowY="auto">
-      <CameraSection>영상 1</CameraSection>
-      <VideoSection>영상 2</VideoSection>
+      <iframe allow='camera; microphone' src={`https://info.gnfire.go.kr/ERSS_P_T/video2.do?dsr_seq=${disasterNumber}`} width="100%" height="100%"></iframe>
     </VStack>
   );
 };

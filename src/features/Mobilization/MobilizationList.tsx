@@ -9,10 +9,11 @@ interface Props {
   title: string;
   address: string;
   time: string;
+  titleIcon:string
 }
 
 const MobilizationList = (props: Props) => {
-  return <MobilizationListItem time={props.time} address={props.address} title={props.title} mobilizationStatus={props.mobilizationStatus} onMobilizationStatusChange={props.onMobilizationStatusChange} isApproved={props.isApproved} onApprovalChange={props.onApprovalChange}/>;
+  return <MobilizationListItem time={props.time} titleIcon={props.titleIcon} address={props.address} title={props.title} mobilizationStatus={props.mobilizationStatus} onMobilizationStatusChange={props.onMobilizationStatusChange} isApproved={props.isApproved} onApprovalChange={props.onApprovalChange}/>;
 };
 
 export default MobilizationList;

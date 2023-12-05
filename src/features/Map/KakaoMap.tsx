@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import axios from "../../common/components/api/axios"
 import { useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
+import { CarApiResponse, WarterApiResponse } from '../types/types';
+import proj4 from 'proj4';
 declare global {
   interface Window {
     kakao: any;
@@ -10,8 +12,8 @@ declare global {
 }
 
 interface Props {
-  latitude?: number; //위도
-  longitude?: number; //경도
+  latitude: number; //위도
+  longitude: number; //경도
   isClickVehicle: boolean;
   isClickWate: boolean;
   
@@ -30,7 +32,24 @@ interface Markers {
   id: string;
 }
 
-let northwardShift = 0; 
+const kndCdMappingTable = (kndCd:string):string =>{
+  switch(kndCd){
+    case "0040001" :return 'P00301'
+    case "0040001" :return 'P00302'
+    case "0040001" :return 'P00303'
+    default : return 'P00304'
+  }
+}
+
+const epsg5181: string = '+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +units=m +no_defs';
+
+const convertCoordinateSystem4326To5181 = (x:number, y:number):[number, number] => {
+  return proj4('EPSG:4326', epsg5181, [x,y]);
+}
+
+const convertCoordinateSystem5181To4326 = (x:number, y:number):[number, number] => {
+  return proj4(epsg5181, 'EPSG:4326', [x,y]);
+}
 
 const KakaoMap = (props: Props) => {
   const { latitude, longitude, isClickVehicle, isClickWate } = props;
@@ -39,46 +58,31 @@ const KakaoMap = (props: Props) => {
   const vehicleMarkers = useRef<any[]>([]);
   const waterMarkers = useRef<any[]>([]);
   const userLocationMarker = useRef<any>(null);
+  const apiIntervalRef = useRef<NodeJS.Timer | null>(null);
 
   const userLocationX = useSelector((state: RootState) => state.userReducer.userLocationX);
+  const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
+  const disasterClsCd = useSelector((state: RootState) => state.disaster.dsrClsCd);
+  const disasterKndCd = useSelector((state: RootState) => state.disaster.dsrKndCd);
+  const disasterCoordinateX = useSelector((state: RootState) => state.disaster.disasterCoordinateX);
+  const disasterCoordinateY = useSelector((state: RootState) => state.disaster.disasterCoordinateY);
   const userLocationY = useSelector((state: RootState) => state.userReducer.userLocationY);
-
-  console.log("userLocationX", userLocationX)
-  console.log("userLocationY", userLocationY)
-
-  if (userLocationX && userLocationY) {
-    console.log("?????")
-    const position = new window.kakao.maps.LatLng(userLocationX, userLocationY);
-    const imageSize = new window.kakao.maps.Size(24, 35); // 마커의 크기 설정
-    const imageOption = { offset: new window.kakao.maps.Point(12, 35) }; // 마커의 옵션 설정
-    const markerImage = createMarkerImage('/images/icons/flag.svg', imageSize, imageOption);
-    const marker = createMarker(position, markerImage);
-
-    marker.setMap(null)
-
-    // 새로운 마커를 지도에 추가하고, 참조를 업데이트합니다.
-    marker.setMap(mapInstance.current);
-    userLocationMarker.current = marker;
-    // 여기서 마커 생성 로직을 실행
-  } else {
-    console.log("사용자 위치가 유효하지 않습니다.");
-  }
 
   const [carMarkers, setCarMarkers] = useState<Markers[]>([])
 
   function changeImage(src: string) {
     let imgSrc = src;
     // 소방용수
-    if (src === '지상') return (imgSrc = '/images/icons/groundWater.svg');
-    if (src === '지하') return (imgSrc = '/images/icons/underGroundWater.svg');
-    if (src === '비상') return (imgSrc = '/images/icons/emergency.svg');
+    if (src.includes('지상')) return (imgSrc = '/images/icons/groundWater.svg');
+    if (src.includes('지하')) return (imgSrc = '/images/icons/underGroundWater.svg');
+    if (src.includes('비상')) return (imgSrc = '/images/icons/emergency.svg');
     // 차량
-    if (src === '펌프') return (imgSrc = '/images/icons/pumpVehicle.svg');
-    if (src === '탱크') return (imgSrc = '/images/icons/tankVehicle.svg');
-    if (src === '화학') return (imgSrc = '/images/icons/chemistryVehicle.svg');
-    if (src === '기타') return (imgSrc = '/images/icons/etcVehicle.svg');
-    if (src === '구조') return (imgSrc = '/images/icons/rescueVehicle.svg');
-    if (src === '구급') return (imgSrc = '/images/icons/firstAidVehicle.svg');
+    if (src.includes('펌프')) return (imgSrc = '/images/icons/pumpVehicle.svg');
+    if (src.includes('탱크')) return (imgSrc = '/images/icons/tankVehicle.svg');
+    if (src.includes('화학')) return (imgSrc = '/images/icons/chemistryVehicle.svg');
+    if (src.includes('기타')) return (imgSrc = '/images/icons/etcVehicle.svg');
+    if (src.includes('구조')) return (imgSrc = '/images/icons/rescueVehicle.svg');
+    if (src.includes('구급')) return (imgSrc = '/images/icons/firstAidVehicle.svg');
     return imgSrc;
   }
 
@@ -181,9 +185,9 @@ const KakaoMap = (props: Props) => {
         };
 
         updateVehicleMarkers();
-        const vehicleInterval = setInterval(updateVehicleMarkers, 10000);
+        setUserLocationMarker()
+        apiIntervalRef.current = setInterval(updateVehicleMarkers, 10000);
 
-        return () => clearInterval(vehicleInterval);
         // 마커 초기화
         //initializeMarkers();
         //toggleMarkers();
@@ -192,10 +196,13 @@ const KakaoMap = (props: Props) => {
 
     return () => {
       script.remove(); // 컴포넌트 언마운트 시 스크립트 제거
+      if(apiIntervalRef.current){
+        clearInterval(apiIntervalRef.current)
+      }
     };
   }, []);
 
-  useEffect(() => {
+  const setUserLocationMarker = () => {
     console.log("Effect 실행됨", userLocationX, userLocationY, mapInstance.current);
   
     if (!window.kakao || !window.kakao.maps) {
@@ -225,7 +232,39 @@ const KakaoMap = (props: Props) => {
     } else {
       console.log("사용자 위치가 유효하지 않습니다.");
     }
-  }, [userLocationX, userLocationY]);
+  }
+
+  // useEffect(() => {
+  //   console.log("Effect 실행됨", userLocationX, userLocationY, mapInstance.current);
+  
+  //   if (!window.kakao || !window.kakao.maps) {
+  //     console.log("카카오 맵 객체가 없습니다.");
+  //     return;
+  //   }
+  
+  //   if (mapInstance.current) {
+  //     console.log("지도 인스턴스 존재함", mapInstance.current);
+  //   } else {
+  //     console.log("지도 인스턴스가 준비되지 않았습니다.");
+  //     return;
+  //   }
+  
+  //   if (userLocationX && userLocationY) {
+  //     console.log("?????")
+  //     const position = new window.kakao.maps.LatLng(userLocationX, userLocationY);
+  //     const imageSize = new window.kakao.maps.Size(24, 35); // 마커의 크기 설정
+  //     const imageOption = { offset: new window.kakao.maps.Point(12, 35) }; // 마커의 옵션 설정
+  //     const markerImage = createMarkerImage('/images/icons/flag.svg', imageSize, imageOption);
+  //     const marker = createMarker(position, markerImage);
+  
+  //     // 새로운 마커를 지도에 추가하고, 참조를 업데이트합니다.
+  //     marker.setMap(mapInstance.current);
+  //     userLocationMarker.current = marker;
+  //     // 여기서 마커 생성 로직을 실행
+  //   } else {
+  //     console.log("사용자 위치가 유효하지 않습니다.");
+  //   }
+  // }, [userLocationX, userLocationY]);
 
   useEffect(() => {
     carMarkers.forEach(vehicle => {
@@ -240,15 +279,29 @@ const KakaoMap = (props: Props) => {
   async function fetchWaterSources() {
     // 실제 API 호출 로직
     // 예시로는 가상의 데이터 반환
+    console.log("fetchWaterSources")
     try {
-      const result = await axios.get<Location[]>("/ab3f21a4-6d88-4ae1-9c1d-c1b4dd1596ca");
+      const coordinate = convertCoordinateSystem4326To5181(props.longitude, props.latitude)
+      const result = await axios.get<WarterApiResponse>("/api/firewater/",{
+        params : {
+          dsrSeq : disasterNumber,
+          dsrClsCd : disasterClsCd,
+          dsrKndCd : kndCdMappingTable(disasterKndCd),
+          gisX : coordinate[0],
+          gisY : coordinate[1]
+        }
+      });
       console.log(result.data)
-      const data = result.data;
-      return data.map(item => ({
-        location: new window.kakao.maps.LatLng(parseFloat(item.lat), parseFloat(item.lon)),
-        type: item.type,
-        id : item.id
-      }));
+      if(result.data.responseCode == 200 && result.data.result && result.data.result.dataList.length > 0){
+        const data = result.data;
+        return data.result.dataList.map(item => ({
+          location: new window.kakao.maps.LatLng(convertCoordinateSystem5181To4326(item.gis_y_5181, item.gis_x_5181)[1], convertCoordinateSystem5181To4326(item.gis_y_5181, item.gis_x_5181)[0]),
+          type: item.form_cd_nm,
+          id : item.hyd_id
+        }));
+      }else{
+        return []
+      }
     } catch (error) {
       console.error(error)
       return []
@@ -260,14 +313,21 @@ const KakaoMap = (props: Props) => {
     // 실제 API 호출 로직
     // 예시로는 가상의 데이터 반환
     try {
-      const result = await axios.get<Location[]>("/c02f9a38-3a97-481c-bb6c-bd5d79179def");
-      const data = result.data;
-      northwardShift += 0.00009;
-      return data.map(item => ({
-        location: new window.kakao.maps.LatLng(parseFloat(item.lat) + northwardShift, parseFloat(item.lon)),
-        type: item.type,
-        id : item.id
-      }));
+      const result = await axios.get<CarApiResponse>("/api/dispatch/",{
+        params : {
+          dsrSeq : disasterNumber
+        }
+      });
+      if(result.data.responseCode == 200 && result.data.result && result.data.result.length > 0){
+        const data = result.data;
+        return data.result.map(item => ({
+          location: new window.kakao.maps.LatLng(parseFloat(item.trCarGisY), parseFloat(item.trCarGisX)),
+          type: item.radioCallsing,
+          id : item.carId
+        }));
+      }else{
+        return []
+      }
     } catch (error) {
       return []
     }

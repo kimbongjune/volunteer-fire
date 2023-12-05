@@ -2,6 +2,9 @@ import React,{useState} from 'react';
 import theme from '@/theme/colors';
 import styled from '@emotion/styled';
 import Image from 'next/image';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
 
 export type PhotoItemTyep = {
   icon: string;
@@ -10,24 +13,26 @@ export type PhotoItemTyep = {
 
 const PhotoItem = (props: PhotoItemTyep) => {
 
-  const [previewSource, setPreviewSource] = useState('');
-  const [mimeType, setMimeType] = useState('');
+  const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
+  const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
 
-  window.handleFileData = (mimeType:string, base64EncoedFile:string) => {
-    
-    const previewDataUri = `data:${mimeType};base64,${base64EncoedFile}`;
-    setMimeType(mimeType)
-    setPreviewSource(previewDataUri);
+  console.log(disasterNumber)
+
+  window.handleFileData = async (mimeType:string, base64EncoedFile:string) => {
 
     const extension = mimeType.split('/')[1];
     const fileName = `file.${extension}`; 
     
     const blob = convertBase64ToBlob(base64EncoedFile, mimeType);
-    console.log(`blob is ${blob}`)
 
     const formData = new FormData();
     formData.append('file', blob, fileName);
-    console.log(`formData is ${formData}`)
+    const fileSendResponse = await axios.post(`http://view2.gnfire.go.kr:3000/chat/${disasterNumber}/${userInfo.userTel}/1/file?gubun=2`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+    console.log(fileSendResponse.data)
   };
 
   function convertBase64ToBlob(base64:string, mimeType:string) {
@@ -69,13 +74,6 @@ const PhotoItem = (props: PhotoItemTyep) => {
     <Container onClick={handleClick}>
       <Image width={56} height={56} src={props.icon} alt={props.text} />
       <Text>{props.text}</Text>
-      {previewSource && (
-        mimeType === 'image/jpeg' ? (
-          <img src={previewSource} alt="Preview" />
-        ) : (
-          <video src={previewSource} controls />
-        )
-      )}
     </Container>
   );
 };

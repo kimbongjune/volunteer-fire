@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface DisasterState {
   disasterNumber: string;
+  dsrClsCd: string;
+  dsrKndCd: string;
   disasterCoordinateX:number;
   disasterCoordinateY:number;
   disasterAcceptFlag:boolean;
@@ -14,6 +16,8 @@ interface DisasterState {
 
 const initialState: DisasterState = {
   disasterNumber: '',
+  dsrClsCd : '',
+  dsrKndCd : '',
   disasterCoordinateX: 0.0,
   disasterCoordinateY: 0.0,
   disasterAcceptFlag:false,
@@ -30,6 +34,12 @@ export const disasterSlice = createSlice({
   reducers: {
     setDisasterNumber: (state, action: PayloadAction<string>) => {
       state.disasterNumber = action.payload;
+    },
+    setDisasterClsCd: (state, action: PayloadAction<string>) => {
+      state.dsrClsCd = action.payload;
+    },
+    setDisasterKndCd: (state, action: PayloadAction<string>) => {
+      state.dsrKndCd = action.payload;
     },
     setDisasterCoordinateX: (state, action: PayloadAction<number>) => {
       state.disasterCoordinateX = action.payload;
@@ -60,6 +70,8 @@ export const disasterSlice = createSlice({
 
 export const { 
   setDisasterNumber,
+  setDisasterClsCd,
+  setDisasterKndCd,
   setDisasterCoordinateX, 
   setDisasterCoordinateY, 
   setDisasterAccptFlag, 

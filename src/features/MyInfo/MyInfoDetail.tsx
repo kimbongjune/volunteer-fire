@@ -11,6 +11,7 @@ interface Props {
   phone?: string;
   address?: string;
   workAddress?: string;
+  type:string
 }
 
 const MyInfoDetail = (props: Props) => {
@@ -35,10 +36,10 @@ const MyInfoDetail = (props: Props) => {
           <Title>실거주지</Title>
           <Text>{props?.address}</Text>
         </Flex>
-        <Flex gap="16px">
+        {props?.type == '3' && <Flex gap="16px">
           <Title>근무지</Title>
           <Text>{props?.workAddress}</Text>
-        </Flex>
+        </Flex>}
       </DetailBox>
     </Container>
   );

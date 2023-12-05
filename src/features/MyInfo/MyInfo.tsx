@@ -10,21 +10,14 @@ import axios from "../../common/components/api/axios"
 import { useSelector } from 'react-redux';
 import { RootState, persistor } from '../../app/store';
 import { useDispatch } from 'react-redux';
-import { saveTag, saveName, saveAddress, saveWorkAddress, saveGroup, savePhone, saveToken, saveMobilizationTotalCount, saveMobilizationAcceptCount, saveMobilizationDenyCount, saveLogedInStatus } from '../../features/slice/UserinfoSlice';
+import { saveLogedInStatus, saveUserInformation } from '../../features/slice/UserinfoSlice';
+import { UserDto } from '../types/types';
 
 const MyInfo = () => {
   const router = useRouter();
   const dispatch = useDispatch()
 
-  const tag = useSelector((state: RootState) => state.userReducer.tag);
-  const group = useSelector((state: RootState) => state.userReducer.group);
-  const name = useSelector((state: RootState) => state.userReducer.name);
-  const address = useSelector((state: RootState) => state.userReducer.address);
-  const workAddress = useSelector((state: RootState) => state.userReducer.workAddress);
-  const phone = useSelector((state: RootState) => state.userReducer.phone);
-  const savedToken = useSelector((state: RootState) => state.userReducer.token);
-
-  const [token, setToken] = useState(savedToken)
+  const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -40,9 +33,6 @@ const MyInfo = () => {
         //setAddress("실 거주지 주소")
         //setWorkAddress("직장 주소")
         //setToken("fcm 토큰")
-        if (window.fireAgency && window.fireAgency.requestGetToken) {
-          window.fireAgency.requestGetToken();
-        }
         //setMobilizationTotalCount("동원 총 개수")
         //setMobilizationAcceptCount("동원 수락 개수")
         //setMobilizationDenyCount("동원 거절 개수")
@@ -54,35 +44,53 @@ const MyInfo = () => {
 
     fetchUserInfo()
   });
-
-  window.updateToken = (token: string) => {
-    setToken(token)
-    dispatch(saveToken(token));
-  };
-
   const logOut =() =>{
     persistor.purge();
-    if (window.fireAgency && window.fireAgency.logout) {
-      window.fireAgency.logout();
-    }
     if (window.fireAgency && window.fireAgency.stopLocationService) {
       window.fireAgency.stopLocationService();
     }
     dispatch(saveLogedInStatus(false))
-    router.push('/logIn')
+    const initailUserInfo:UserDto = {
+      sub: "",
+      appUserId: "",
+      userName: "",
+      appUserPw:"",
+      jurisWardId: "",
+      jurisWardName : "",
+      nmPlace:"",
+      teamId: "",
+      volunPosition: "",
+      liveBunjiAdress: "",
+      liveDoroAdress: "",
+      workBunjiAdress:"",
+      workDoroAdress: "",
+      userTel: "",
+      fcmToken: "",
+      reqTsTime: 0,
+      accTsTime: 0,
+      dnyTsTime: 0,
+      type: "",
+      iat: 0,
+    }
+    dispatch(saveUserInformation(initailUserInfo))
+
+    if (window.fireAgency && window.fireAgency.logout) {
+      window.fireAgency.logout();
+    }
   }
 
   return (
     <Flex direction="column" gap="8px" w="100%" h="100%">
       <MyInfoDetail 
-        tag={tag}
-        name={name}
-        group={group}
-        phone={phone}
-        address={address}
-        workAddress={workAddress}
+        type={userInfo.type}
+        tag={userInfo.volunPosition}
+        name={userInfo.userName}
+        group={userInfo.jurisWardName}
+        phone={userInfo.userTel}
+        address={userInfo.liveBunjiAdress}
+        workAddress={userInfo.workBunjiAdress}
       />
-      <MyToken token={token} />
+      <MyToken token={userInfo.fcmToken} />
       <Button onClick={() => logOut()} height="56px" backgroundColor={theme.colors[3]} padding="16px" margin="auto 0 0">
         <Text>로그아웃</Text>
       </Button>

@@ -21,12 +21,7 @@ const MapPage = () => {
 
   const disasterWaterMakrerShowFlag =  useSelector((state: RootState) => state.disaster.disasterWaterMarkerShowFlag);
   const disasterVehicleMarkerShowFlag =  useSelector((state: RootState) => state.disaster.disasterVehicleMarkerShowFlag);
-  const gpsStatusSatelliteCount = useSelector((state: RootState) => state.userReducer.gpsStatusSatelliteCount);
   const gpsStatusDbHzAverage = useSelector((state: RootState) => state.userReducer.gpsStatusDbHzAverage);
-
-
-  console.log("gpsStatusSatelliteCount", gpsStatusSatelliteCount)
-  console.log("gpsStatusDbHzAverage", gpsStatusDbHzAverage)
 
   const [isClickVehicle, setIsClickVehicle] = useState(disasterWaterMakrerShowFlag);
   const [isClickWater, setIsClickWater] = useState(disasterVehicleMarkerShowFlag);
@@ -44,10 +39,8 @@ const MapPage = () => {
   dispatch(setDisasterWaterMakrerShowFlag(isClickWater))
   dispatch(setDisasterVehicleMarkerShowFlag(isClickVehicle))
 
-  const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
   const disasterCoordinateX = useSelector((state: RootState) => state.disaster.disasterCoordinateX);
   const disasterCoordinateY = useSelector((state: RootState) => state.disaster.disasterCoordinateY);
-  console.log("disasterNumber = " + disasterNumber)
 
   return (
     <>
@@ -56,7 +49,7 @@ const MapPage = () => {
 
         <Flex justifyContent="space-between">
           <ButtonContainer>
-            <Button backgroundColor={isClickVehicle ? theme.colors.gray: theme.colors.orange} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickVehicle(!isClickVehicle)}>
+            <Button backgroundColor={!isClickVehicle ? theme.colors.gray: theme.colors.orange} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickVehicle(!isClickVehicle)}>
               <Flex gap="8px">
                 <IconWrapper width="24px" height="24px" color={theme.colors.white}>
                   <FireTruck />
@@ -66,7 +59,7 @@ const MapPage = () => {
             </Button>
           </ButtonContainer>
           <ButtonContainer>
-            <Button backgroundColor={isClickWater ? theme.colors.gray: theme.colors.orange} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickWater(!isClickWater)}>
+            <Button backgroundColor={!isClickWater ? theme.colors.gray: theme.colors.orange} height="48px" padding="12px 16px" borderRadius="8px" onClick={() => setIsClickWater(!isClickWater)}>
               <Flex gap="8px">
                 <IconWrapper width="24px" height="24px" color={theme.colors.white}>
                   <WaterDrop />

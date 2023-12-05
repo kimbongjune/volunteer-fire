@@ -17,6 +17,10 @@ const GlobalFunctionHandler = () => {
         dispatch(saveUserLocationX(latitude));
         dispatch(saveUserLocationY(longitude));
     };
+
+    window.saveUserDate = () => {
+      console.log(`유저정보 저장`)
+  };
   }, [dispatch]);
 
   return null;

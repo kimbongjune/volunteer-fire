@@ -8,13 +8,19 @@ import Button from '@/common/components/Button/Button';
 import { useRouter } from 'next/router';
 import axios from "../../common/components/api/axios"
 import { useDispatch } from 'react-redux';
-import { saveToken } from '../../features/slice/UserinfoSlice';
+import { saveUserInformation } from '../../features/slice/UserinfoSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
+import { jwtDecode } from 'jwt-decode'
+import { UserDto, apiPostResponse } from '../types/types';
 
 const ModifyToken = () => {
   const router = useRouter()
   const query = router.query
 
   const dispatch = useDispatch()
+
+  const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
 
   const [newToken, setNewToken] = useState("")
   const [token, setToken] = useState(query.param)
@@ -39,14 +45,31 @@ const ModifyToken = () => {
     try {
       //API 호출 로직
       console.log("유저정보 갱신 콜")
-      //const response = await axios.get('/user-info');
-      setToken(newToken)
-      setNewToken("")
-      dispatch(saveToken(newToken))
-      router.replace({
-        pathname: router.pathname, // 현재 페이지 경로
-        query: { ...router.query, param: newToken }, // 나머지 쿼리 유지하며 'param'만 업데이트
-      }, undefined, { shallow: true }); // 페이지 전환 없이 URL 업데이트
+      const userUpdateResponse = await axios.put<apiPostResponse>("/api/user/info", {
+        userId : userInfo.sub,
+        userType : userInfo.type,
+        fcmToken : newToken
+      })
+      if(userUpdateResponse.data.responseCode === 200){
+        const fetchUserData = await axios.post("/api/user/login/auth",{
+          userId : userInfo.appUserId,
+          userPassword : userInfo.appUserPw
+        })
+        if(fetchUserData.data.responseCode === 200){
+          localStorage.setItem("token", fetchUserData.headers['authorization']);
+          if (window.fireAgency && window.fireAgency.updateUser) {
+            window.fireAgency.updateUser(userInfo.appUserId, fetchUserData.headers['authorization']);
+          }
+          dispatch(saveUserInformation(jwtDecode<UserDto>(fetchUserData.headers['authorization'])))
+          setToken(newToken)
+          setNewToken("")
+          router.replace({
+            pathname: router.pathname, // 현재 페이지 경로
+            query: { ...router.query, param: newToken }, // 나머지 쿼리 유지하며 'param'만 업데이트
+          }, undefined, { shallow: true }); // 페이지 전환 없이 URL 업데이트
+        }
+      }
+      
     } catch (error) {
       // 에러 처리
       console.error('Failed to fetch user info status:', error);
