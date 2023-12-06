@@ -16,7 +16,7 @@ interface Window {
       runVideoCamera?: () => void;
       runGallery?: () => void;
       getLastLocation?: () => string;
-      updateUser?: (id:String, token:string) => string;
+      saveJwtToken?: (id:String, token:string) => string;
     };
     updateToken?:(token:string) => void;
     getSavedUserToken?:(userdata:userData) => void;

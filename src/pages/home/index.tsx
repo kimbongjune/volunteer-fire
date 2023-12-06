@@ -165,8 +165,8 @@ const HomePage = () => {
             localStorage.setItem("token", fetchUserData.headers['authorization']);
             setAuthToken(fetchUserData.headers['authorization'])
           }
-          if (window.fireAgency && window.fireAgency.updateUser) {
-            window.fireAgency.updateUser(userInfo.appUserId, fetchUserData.headers['authorization']);
+          if (window.fireAgency && window.fireAgency.saveJwtToken) {
+            window.fireAgency.saveJwtToken(userInfo.appUserId, fetchUserData.headers['authorization']);
           }
           dispatch(saveUserInformation(jwtDecode<UserDto>(fetchUserData.headers['authorization'])))
         }else{
