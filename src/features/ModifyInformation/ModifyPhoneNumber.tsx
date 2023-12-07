@@ -54,8 +54,8 @@ const ModifyPhoneNumber = () => {
           })
           if(fetchUserData.data.responseCode === 200){
             localStorage.setItem("token", fetchUserData.headers['authorization']);
-            if (window.fireAgency && window.fireAgency.updateUser) {
-              window.fireAgency.updateUser(userInfo.appUserId, fetchUserData.headers['authorization']);
+            if (window.fireAgency && window.fireAgency.saveJwtToken) {
+              window.fireAgency.saveJwtToken(userInfo.appUserId, fetchUserData.headers['authorization']);
             }
             dispatch(saveUserInformation(jwtDecode<UserDto>(fetchUserData.headers['authorization'])))
             setPhone(newPhone)
