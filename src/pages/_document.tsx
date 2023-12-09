@@ -2,7 +2,6 @@ import { Html, Head, Main, NextScript } from 'next/document';
 import Script from 'next/script';
 
 export default function Document() {
-  const apiKey = process.env.NEXT_PUBLIC_KAKAOMAP_API_KEY;
 
   return (
     <Html lang="en">
