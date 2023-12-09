@@ -2,9 +2,10 @@ import React,{useEffect, useState} from 'react';
 import theme from '@/theme/colors';
 import styled from '@emotion/styled';
 import Image from 'next/image';
-import axios from 'axios';
+
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
+import axios from '@/common/components/api/axios';
 
 export type PhotoItemTyep = {
   icon: string;
