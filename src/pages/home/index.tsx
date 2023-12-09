@@ -231,7 +231,7 @@ const HomePage = () => {
               dispatch(setDisasterNumber(""))
               dispatch(setDisasterClsCd(""))
               dispatch(setDisasterKndCd(""))
-              alert("재난이 종결되었습니다.");
+              console.log("재난 종결")
             }
             setHasRead(result.colChkYn == 'Y')
             setMobilizationStatus(result.accTimeCount == '1' || result.dnyTimeCount == '1')
@@ -328,9 +328,15 @@ const HomePage = () => {
       if (window.fireAgency && window.fireAgency.stopLocationService) {
         window.fireAgency.stopLocationService();
       }
+      if (window.fireAgency && window.fireAgency.saveDisasterNumber) {
+        window.fireAgency.saveDisasterNumber(dsrSeq);
+      }
     }else{
       if (window.fireAgency && window.fireAgency.startLocationService) {
         window.fireAgency.startLocationService();
+      }
+      if (window.fireAgency && window.fireAgency.deleteDisasterNumber) {
+        window.fireAgency.deleteDisasterNumber();
       }
     }
   },[isApproved])
