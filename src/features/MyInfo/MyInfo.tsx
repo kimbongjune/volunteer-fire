@@ -19,6 +19,19 @@ const MyInfo = () => {
 
   const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
 
+  useEffect(() =>{
+    const sendClickStream = async () =>{
+      if(userInfo){
+        const clickStreamResponse = await axios.post("/api/menu_log/enter",{
+          menuId : "2200",
+          userId : userInfo.appUserId
+        })
+        console.log(clickStreamResponse.data)
+      }
+    }
+    sendClickStream()
+  }, [userInfo])
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {

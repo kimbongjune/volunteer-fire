@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useEffect, useState} from 'react';
 import theme from '@/theme/colors';
 import styled from '@emotion/styled';
 import Image from 'next/image';
@@ -15,6 +15,19 @@ const PhotoItem = (props: PhotoItemTyep) => {
 
   const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
   const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
+
+  useEffect(() =>{
+    const sendClickStream = async () =>{
+      if(userInfo){
+        const clickStreamResponse = await axios.post("/api/menu_log/enter",{
+          menuId : "2120",
+          userId : userInfo.appUserId
+        })
+        console.log(clickStreamResponse.data)
+      }
+    }
+    sendClickStream()
+  }, [userInfo])
 
   console.log(disasterNumber)
 

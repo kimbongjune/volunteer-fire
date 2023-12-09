@@ -14,10 +14,13 @@ import { RootState } from '../app/store';
 import Satellite from '../../public/images/icons/satellite.svg';
 import { useDispatch } from 'react-redux';
 import { setDisasterWaterMakrerShowFlag, setDisasterVehicleMarkerShowFlag } from '../features/slice/disasterSlice';
+import axios from '@/common/components/api/axios';
 
 const MapPage = () => {
 
   const dispatch = useDispatch()
+
+  const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
 
   const disasterWaterMakrerShowFlag =  useSelector((state: RootState) => state.disaster.disasterWaterMarkerShowFlag);
   const disasterVehicleMarkerShowFlag =  useSelector((state: RootState) => state.disaster.disasterVehicleMarkerShowFlag);
@@ -35,6 +38,19 @@ const MapPage = () => {
       setIsReceivingGPS(false);
     }
   }, [gpsStatusDbHzAverage]);
+
+  useEffect(() =>{
+    const sendClickStream = async () =>{
+      if(userInfo){
+        const clickStreamResponse = await axios.post("/api/menu_log/enter",{
+          menuId : "2110",
+          userId : userInfo.appUserId
+        })
+        console.log(clickStreamResponse.data)
+      }
+    }
+    sendClickStream()
+  }, [userInfo])
 
   dispatch(setDisasterWaterMakrerShowFlag(isClickWater))
   dispatch(setDisasterVehicleMarkerShowFlag(isClickVehicle))

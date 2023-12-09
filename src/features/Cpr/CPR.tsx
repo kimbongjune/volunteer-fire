@@ -4,11 +4,29 @@ import CprBox, { CprItemType } from './CprBox';
 import { Box, Flex } from '@chakra-ui/react';
 import theme from '@/theme/colors';
 import AudioPlayer from '@/common/components/Player/AudioPlayer';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
+import axios from '@/common/components/api/axios';
 
 
 const CPR = () => {
 
   const [videos, setVideos] = useState<CprItemType[]>([]);
+
+  const userInfo = useSelector((state: RootState) => state.userReducer.userInformation);
+
+  useEffect(() =>{
+    const sendClickStream = async () =>{
+      if(userInfo){
+        const clickStreamResponse = await axios.post("/api/menu_log/enter",{
+          menuId : "2200",
+          userId : userInfo.appUserId
+        })
+        console.log(clickStreamResponse.data)
+      }
+    }
+    sendClickStream()
+  }, [userInfo])
 
   useEffect(() => {
     setVideos([

@@ -205,6 +205,17 @@ const HomePage = () => {
 
   useEffect(() =>{
     // API 호출을 수행하는 함수
+
+    const sendClickStream = async () =>{
+      if(userInfo){
+        const clickStreamResponse = await axios.post("/api/menu_log/enter",{
+          menuId : "2100",
+          userId : userInfo.appUserId
+        })
+        console.log(clickStreamResponse.data)
+      }
+    }
+
     const fetchMobilizationStatus = async () => {
       if(userInfo){
         if (window.fireAgency && window.fireAgency.requestGetToken) {
@@ -266,6 +277,7 @@ const HomePage = () => {
 
     // 컴포넌트가 마운트될 때 첫 번째 API 호출을 수행
     fetchMobilizationStatus();
+    sendClickStream()
 
     // setInterval을 사용하여 주기적으로 API를 호출
     const interval = setInterval(fetchMobilizationStatus, 60000); // 10초마다 호출
@@ -275,7 +287,7 @@ const HomePage = () => {
       console.log("동원 api 콜 해제")
       clearInterval(interval)
     };
-  },[userInfo])
+  },[userInfo, isApproved])
 
   // Modal을 닫을 때 호출되는 함수
   const handleModalClose = async () => {
