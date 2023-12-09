@@ -11,6 +11,8 @@ interface Window {
       copyClipboard?: (copyText:string) => void;
       startLocationService?: () => void;
       stopLocationService?: () => void
+      saveDisasterNumber?:(disasterNumber:string) => void
+      deleteDisasterNumber?:() => void
       getUserData?: () => string
       runCamera?: () => void;
       runVideoCamera?: () => void;
