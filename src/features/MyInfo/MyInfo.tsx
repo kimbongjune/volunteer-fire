@@ -23,7 +23,7 @@ const MyInfo = () => {
     const sendClickStream = async () =>{
       if(userInfo){
         const clickStreamResponse = await axios.post("/api/menu_log/enter",{
-          menuId : "2200",
+          menuId : "2300",
           userId : userInfo.appUserId
         })
         console.log(clickStreamResponse.data)
