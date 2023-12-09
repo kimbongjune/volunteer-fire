@@ -237,6 +237,9 @@ const HomePage = () => {
             setMobilizationStatus(result.accTimeCount == '1' || result.dnyTimeCount == '1')
             setIsApproved(result.accTimeCount == '1' && result.dnyTimeCount != '1')
             setDsrSeq(result.dsrSeq)
+            if (window.fireAgency && window.fireAgency.saveDisasterNumber) {
+              window.fireAgency.saveDisasterNumber(result.dsrSeq);
+            }
             dispatch(setDisasterNumber(result.dsrSeq))
             dispatch(setDisasterClsCd(result.dsrClsCd))
             dispatch(setDisasterKndCd(result.dsrKndCd))
@@ -327,9 +330,6 @@ const HomePage = () => {
     if(!isApproved){
       if (window.fireAgency && window.fireAgency.stopLocationService) {
         window.fireAgency.stopLocationService();
-      }
-      if (window.fireAgency && window.fireAgency.saveDisasterNumber) {
-        window.fireAgency.saveDisasterNumber(dsrSeq);
       }
     }else{
       if (window.fireAgency && window.fireAgency.startLocationService) {
