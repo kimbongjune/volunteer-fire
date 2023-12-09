@@ -40,7 +40,7 @@ const PhotoItem = (props: PhotoItemTyep) => {
 
     const formData = new FormData();
     formData.append('file', blob, fileName);
-    const fileSendResponse = await axios.post(`http://view2.gnfire.go.kr:3000/chat/${disasterNumber}/${userInfo.userTel}/1/file?gubun=2`, formData, {
+    const fileSendResponse = await axios.post(`https://view2.gnfire.go.kr:8887/chat/${disasterNumber}/${userInfo.userTel}/1/file?gubun=2`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
