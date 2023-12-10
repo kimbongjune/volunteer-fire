@@ -25,7 +25,7 @@ const Video = () => {
   }, [userInfo])
   return (
     <VStack gap="8px" height="100%" overflowY="auto">
-      <iframe allow='camera; microphone' src={`https://info.gnfire.go.kr/ERSS_P_T/video2.do?dsr_seq=${disasterNumber}`} width="100%" height="100%"></iframe>
+      <iframe allow='camera; microphone' src={`https://info.gnfire.go.kr/ERSS_P/video2.do?dsr_seq=${disasterNumber}`} width="100%" height="100%"></iframe>
     </VStack>
   );
 };
