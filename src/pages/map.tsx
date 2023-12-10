@@ -52,8 +52,13 @@ const MapPage = () => {
     sendClickStream()
   }, [userInfo])
 
-  dispatch(setDisasterWaterMakrerShowFlag(isClickWater))
-  dispatch(setDisasterVehicleMarkerShowFlag(isClickVehicle))
+  useEffect(() =>{
+    dispatch(setDisasterWaterMakrerShowFlag(isClickWater))
+  }, [isClickWater])
+
+  useEffect(() =>{
+    dispatch(setDisasterVehicleMarkerShowFlag(isClickVehicle))
+  }, [isClickVehicle])
 
   const disasterCoordinateX = useSelector((state: RootState) => state.disaster.disasterCoordinateX);
   const disasterCoordinateY = useSelector((state: RootState) => state.disaster.disasterCoordinateY);
