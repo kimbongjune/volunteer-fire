@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
 import axios from '@/common/components/api/axios';
+import Axios from 'axios';
 
 export type PhotoItemTyep = {
   icon: string;
@@ -41,7 +42,7 @@ const PhotoItem = (props: PhotoItemTyep) => {
 
     const formData = new FormData();
     formData.append('file', blob, fileName);
-    const fileSendResponse = await axios.post(`https://view2.gnfire.go.kr:8887/chat/${disasterNumber}/${userInfo.userTel}/1/file?gubun=2`, formData, {
+    const fileSendResponse = await Axios.post(`https://view2.gnfire.go.kr:8887/chat/${disasterNumber}/${userInfo.userTel}/1/file?gubun=2`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
