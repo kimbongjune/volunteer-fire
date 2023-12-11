@@ -22,7 +22,12 @@ const MapNav = () => {
   const openThirdPartyMapApplication = (mapType:string) =>{
     if (window.fireAgency && window.fireAgency.openThirdPartyMapApplication) {
       console.log(disasterCoordinateX, disasterCoordinateY)
-      window.fireAgency.openThirdPartyMapApplication(mapType, disasterCoordinateY.toString(), disasterCoordinateX.toString(), disasterAddress);
+      if(mapType == 'onenavi'){
+        window.fireAgency.openThirdPartyMapApplication(mapType, disasterCoordinateX.toString(), disasterCoordinateY.toString(), disasterAddress);
+      }else{
+        window.fireAgency.openThirdPartyMapApplication(mapType, disasterCoordinateY.toString(), disasterCoordinateX.toString(), disasterAddress);
+      }
+      
     }
   }
 
