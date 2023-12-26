@@ -35,8 +35,8 @@ interface Markers {
 const kndCdMappingTable = (kndCd:string):string =>{
   switch(kndCd){
     case "0040001" :return 'P00301'
-    case "0040001" :return 'P00302'
-    case "0040001" :return 'P00303'
+    case "0040002" :return 'P00302'
+    case "0040003" :return 'P00303'
     default : return 'P00304'
   }
 }
@@ -83,6 +83,9 @@ const KakaoMap = (props: Props) => {
     if (src.includes('기타')) return (imgSrc = '/images/icons/etcVehicle.svg');
     if (src.includes('구조')) return (imgSrc = '/images/icons/rescueVehicle.svg');
     if (src.includes('구급')) return (imgSrc = '/images/icons/firstAidVehicle.svg');
+    if(!imgSrc.includes("images")){
+      imgSrc = '/images/icons/flag.svg'
+    }
     return imgSrc;
   }
 
@@ -104,6 +107,8 @@ const KakaoMap = (props: Props) => {
 
   useEffect(() => {
     const script = document.createElement('script');
+    //TODO 지도 로딩 확인
+    script.async = false;
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAOMAP_API_KEY}&libraries=services,clusterer,drawing&autoload=false`;
     document.head.appendChild(script);
 
@@ -222,7 +227,7 @@ const KakaoMap = (props: Props) => {
       const position = new window.kakao.maps.LatLng(userLocationX, userLocationY);
       const imageSize = new window.kakao.maps.Size(24, 35); // 마커의 크기 설정
       const imageOption = { offset: new window.kakao.maps.Point(12, 35) }; // 마커의 옵션 설정
-      const markerImage = createMarkerImage('/images/icons/flag.svg', imageSize, imageOption);
+      const markerImage = createMarkerImage('/images/icons/Ripple-3.1s-354px.gif', imageSize, imageOption);
       const marker = createMarker(position, markerImage);
   
       // 새로운 마커를 지도에 추가하고, 참조를 업데이트합니다.
@@ -295,7 +300,7 @@ const KakaoMap = (props: Props) => {
       if(result.data.responseCode == 200 && result.data.result && result.data.result.dataList.length > 0){
         const data = result.data;
         return data.result.dataList.map(item => ({
-          location: new window.kakao.maps.LatLng(convertCoordinateSystem5181To4326(item.gis_y_5181, item.gis_x_5181)[1], convertCoordinateSystem5181To4326(item.gis_y_5181, item.gis_x_5181)[0]),
+          location: new window.kakao.maps.LatLng(convertCoordinateSystem5181To4326(item.gis_x_5181, item.gis_y_5181)[1], convertCoordinateSystem5181To4326(item.gis_x_5181, item.gis_y_5181)[0]),
           type: item.form_cd_nm,
           id : item.hyd_id
         }));
