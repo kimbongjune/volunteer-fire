@@ -15,7 +15,7 @@ import { setDisasterAccptFlag } from '../../features/slice/disasterSlice';
 import axios from "../../common/components/api/axios"
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/app/store';
+import { RootState, persistor } from '@/app/store';
 import { apiPostResponse } from '../types/types';
 
 const MobilizationStatus = () => {
@@ -58,6 +58,7 @@ const MobilizationStatus = () => {
   const cancelMobilization = async () => {
     //동원 취소 API 발송
     console.log("동원 취소");
+    persistor.purge();
     const approveResponse = await axios.post<apiPostResponse>("/api/mobilize/mob",{
       dsrSeq : disasterNumber,
       flag : "N",

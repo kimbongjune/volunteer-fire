@@ -10,7 +10,7 @@ import axios,{setAuthToken} from "../../common/components/api/axios"
 import { useSelector } from 'react-redux';
 import { setDisasterNumber, setDisasterCoordinateX, setDisasterCoordinateY, setDisasterAccptFlag, setDisasterClsCd, setDisasterKndCd } from '../../features/slice/disasterSlice';
 import { saveLogedInStatus,saveUserInformation } from '../../features/slice/UserinfoSlice';
-import { RootState } from '../../app/store';
+import { RootState, persistor } from '../../app/store';
 import { useDispatch } from 'react-redux';
 import { MobilizationResponseDto, UserDto, apiPostResponse } from '@/features/types/types';
 import { jwtDecode } from 'jwt-decode'
@@ -127,7 +127,9 @@ const HomePage = () => {
   const { query } = useRouter();
   const menu = query.menu;
   // 동원상태를 관리하기위한 임시쿼리스트링 (동원요청알림을 받아 승인을 눌렀을때)
- 
+  const disasterNumber = useSelector((state: RootState) => state.disaster.disasterNumber);
+  const disasterAccptFlag = useSelector((state: RootState) => state.disaster.disasterAcceptFlag);
+
   const [isRequest, setIsRequest] = useState(false);
   const [hasRead, setHasRead] = useState(false); // 추가된 상태
   const [isApproved, setIsApproved] = useState(false); // 승인 상태 초기화
@@ -212,47 +214,56 @@ const HomePage = () => {
           window.fireAgency.requestGetToken();
         }
         try {
-          //API 호출 로직
-          console.log("동원 api 콜")
-          const mobilizationResponse = await axios.get<MobilizationResponseDto>('/api/mobilize/',{
-            params :{
-              userId : userInfo.sub
-            }
-          });
 
-          console.log(mobilizationResponse.data)
+            //API 호출 로직
+            console.log("동원 api 콜")
+            const mobilizationResponse = await axios.get<MobilizationResponseDto>('/api/mobilize/',{
+              params :{
+                userId : userInfo.sub,
+                dsrSeq : disasterAccptFlag ? disasterNumber : ""
+              }
+            });
 
-          if(mobilizationResponse.data.responseCode == 200 && mobilizationResponse.data.result){
-            const result = mobilizationResponse.data.result
-            setIsRequest(result.statEndDtime.trim().length == 0)
-            if(result.statEndDtime.trim().length > 1){
-              dispatch(setDisasterCoordinateX(0.0));
-              dispatch(setDisasterCoordinateY(0.0));
-              dispatch(setDisasterNumber(""))
-              dispatch(setDisasterClsCd(""))
-              dispatch(setDisasterKndCd(""))
-              console.log("재난 종결")
+            console.log(mobilizationResponse.data)
+
+            if(mobilizationResponse.data.responseCode == 200 && mobilizationResponse.data.result){
+              const result = mobilizationResponse.data.result
+              if(result == null){
+                setIsRequest(false)
+                setHasRead(false)
+                setIsApproved(false)
+                setMobilizationStatus(false)
+                setDsrSeq("")
+                setDisasterAddress("")
+                setTitleIcon("")
+                setTitle("")
+                setTime("")
+                persistor.purge();
+                console.log("재난 종결")
+              }else{
+                setIsRequest(true)
+                setHasRead(result.colChkYn == 'Y')
+                setMobilizationStatus(result.accTimeCount == '1' || result.dnyTimeCount == '1')
+                setIsApproved(result.accTimeCount == '1' && result.dnyTimeCount != '1')
+                setDsrSeq(result.dsrSeq)
+                if (window.fireAgency && window.fireAgency.saveDisasterNumber) {
+                  window.fireAgency.saveDisasterNumber(result.dsrSeq);
+                }
+                dispatch(setDisasterNumber(result.dsrSeq))
+                dispatch(setDisasterClsCd(result.dsrClsCd))
+                dispatch(setDisasterKndCd(result.dsrKndCd))
+                setDisasterAddress(result.lawAddr)
+                setTime(formatDateTime(result.regDtime))
+                setTitle(getCodeDescriptionByClsCd(result.dsrClsCd))
+                setTitleIcon(getIconnByKndCd(result.dsrKndCd))
+                const gisData = convertCoordinateSystem(result.dsrGisX, result.dsrGisY)
+                dispatch(setDisasterCoordinateX(gisData[1]));
+                dispatch(setDisasterCoordinateY(gisData[0]));
+              }
+            }else{
+              setIsRequest(false)
             }
-            setHasRead(result.colChkYn == 'Y')
-            setMobilizationStatus(result.accTimeCount == '1' || result.dnyTimeCount == '1')
-            setIsApproved(result.accTimeCount == '1' && result.dnyTimeCount != '1')
-            setDsrSeq(result.dsrSeq)
-            if (window.fireAgency && window.fireAgency.saveDisasterNumber) {
-              window.fireAgency.saveDisasterNumber(result.dsrSeq);
-            }
-            dispatch(setDisasterNumber(result.dsrSeq))
-            dispatch(setDisasterClsCd(result.dsrClsCd))
-            dispatch(setDisasterKndCd(result.dsrKndCd))
-            setDisasterAddress(result.lawAddr)
-            setTime(formatDateTime(result.regDtime))
-            setTitle(getCodeDescriptionByClsCd(result.dsrClsCd))
-            setTitleIcon(getIconnByKndCd(result.dsrKndCd))
-            const gisData = convertCoordinateSystem(result.dsrGisX, result.dsrGisY)
-            dispatch(setDisasterCoordinateX(gisData[1]));
-            dispatch(setDisasterCoordinateY(gisData[0]));
-          }else{
-            setIsRequest(false)
-          }
+          
           //동원 응답이 있으면 true 없으면 false
           //전역 재난번호 저장
           //재난 좌표 저장
@@ -272,14 +283,14 @@ const HomePage = () => {
     fetchMobilizationStatus();
 
     // setInterval을 사용하여 주기적으로 API를 호출
-    const interval = setInterval(fetchMobilizationStatus, 60000); // 10초마다 호출
+    const interval = setInterval(fetchMobilizationStatus, 30000); // 30초마다 호출
 
     // 컴포넌트가 언마운트될 때 인터벌을 정리
     return () => {
       console.log("동원 api 콜 해제")
       clearInterval(interval)
     };
-  },[userInfo, isApproved])
+  },[userInfo, disasterAccptFlag])
 
   useEffect(() =>{
     const sendClickStream = async () =>{
